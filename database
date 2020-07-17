@@ -1,0 +1,10 @@
+{"_id":"userIds","ids":["40f85b8e-00a1-459f-b810-951073df1281","65c04b2e-3b9c-4649-ad2b-d4897899a022","c9df9f58-50e4-472b-810d-f5a7b360f22f","bf559f6a-4bc3-42c0-8ae3-9c474cf7d5cd","79e33d68-89e6-4cf1-a4bd-d01e26f6615c","4d9422af-4a22-462b-88ae-063fc691e014"]}
+{"name":"","ageGroup":"kids","isPasswordProtected":false,"password":"","_id":"b917c7a5-b27a-4da6-8968-e3f06cccf3eb"}
+{"_id":"userIds","ids":["40f85b8e-00a1-459f-b810-951073df1281","65c04b2e-3b9c-4649-ad2b-d4897899a022","c9df9f58-50e4-472b-810d-f5a7b360f22f","bf559f6a-4bc3-42c0-8ae3-9c474cf7d5cd","79e33d68-89e6-4cf1-a4bd-d01e26f6615c","4d9422af-4a22-462b-88ae-063fc691e014","b917c7a5-b27a-4da6-8968-e3f06cccf3eb"]}
+{"$$deleted":true,"_id":"b917c7a5-b27a-4da6-8968-e3f06cccf3eb"}
+{"name":"Gaurav","ageGroup":"adults","isPasswordProtected":true,"password":"5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8","_id":"2ae7dc3d-18f7-4adf-b881-1bd2d82dd2e5"}
+{"_id":"userIds","ids":["40f85b8e-00a1-459f-b810-951073df1281","65c04b2e-3b9c-4649-ad2b-d4897899a022","c9df9f58-50e4-472b-810d-f5a7b360f22f","bf559f6a-4bc3-42c0-8ae3-9c474cf7d5cd","79e33d68-89e6-4cf1-a4bd-d01e26f6615c","4d9422af-4a22-462b-88ae-063fc691e014","b917c7a5-b27a-4da6-8968-e3f06cccf3eb","2ae7dc3d-18f7-4adf-b881-1bd2d82dd2e5"]}
+{"name":"Gaurav","ageGroup":"kids","isPasswordProtected":false,"password":"","_id":"cb6fe8a7-4ace-4ea9-a02b-3ab23a528790"}
+{"_id":"userIds","ids":["40f85b8e-00a1-459f-b810-951073df1281","65c04b2e-3b9c-4649-ad2b-d4897899a022","c9df9f58-50e4-472b-810d-f5a7b360f22f","bf559f6a-4bc3-42c0-8ae3-9c474cf7d5cd","79e33d68-89e6-4cf1-a4bd-d01e26f6615c","4d9422af-4a22-462b-88ae-063fc691e014","b917c7a5-b27a-4da6-8968-e3f06cccf3eb","2ae7dc3d-18f7-4adf-b881-1bd2d82dd2e5","cb6fe8a7-4ace-4ea9-a02b-3ab23a528790"]}
+{"$$deleted":true,"_id":"cb6fe8a7-4ace-4ea9-a02b-3ab23a528790"}
+{"$$deleted":true,"_id":"2ae7dc3d-18f7-4adf-b881-1bd2d82dd2e5"}

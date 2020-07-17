@@ -1,0 +1,112 @@
+<html>
+  <head>
+    <title>The Gateway</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
+    <link rel="stylesheet" href="css/main.css">
+    <script defer>window.$ = window.jQuery = require('jquery');</script>
+    <script type="text/javascript" src="js/constants.js" defer></script>
+    <script type="text/javascript" src="js/index.js" defer></script>
+  </head>
+  <body>
+    <video autoplay muted loop class="background-video">
+      <source src="videos/Network-27018.mp4" type="video/mp4">
+    </video>
+    <div class="content">
+      <!--ACCOUNTS-->
+      <div id="accounts-div">
+        <h1>Welcome</h1>
+        <div id="account-cards">
+        </div>
+        <div id="create-account-card" class="account-card">
+          <p>Create Account</p>
+        </div>
+      </div>
+      <!--CREATE ACCOUNT-->
+      <div id="create-account-div" class="hidden">
+        <input type="button" value="Back" class="back-button">
+        <h1>Create Account</h1>
+        <div class="card height-400 width-400">
+          <div class="padding-20">
+            <div class="height-200">
+              <p>
+                <label for="name">Name: </label>
+                <input type="text" id="name">
+              </p>
+              <p>
+                <label for="age-group">Age Group:</label>
+                <select id="age-group">
+                  <option value="kids">12 and under</option>
+                  <option value="teens">Teenagers</option>
+                  <option value="adults">Adults</option>
+                </select>
+              </p>
+              <p>
+                <label for="password-protected">Password Protected: </label>
+                <input type="checkbox" id="password-protected">
+              </p>
+              <p id="password-row" class="hidden">
+                <label for="password">Password: </label>
+                <input type="password" id="password">
+              </p>
+            </div>
+            <input type="button" id="create-account-submit" class="card-button" value="Submit">
+            <p id="create-account-error" class="error hidden">Sorry, looks like there was an error &#129301;</p>
+          </div>
+        </div>
+      </div>
+      <!--ACCOUNT-->
+      <div id="account-div" class="hidden">
+        <input type="button" value="Back" class="back-button">
+        <h1 id="user-name">...</h1>
+        <div class="card height-400 width-400">
+          <div class="padding-20">
+            <p><input type='radio' name='connection' value='local' checked> Accessing The Gateway from this Computer</p>
+            <p><input type='radio' name='connection' value='network'> Accessing The Gateway from another Device</p>
+            <div id="local-start-div">
+              <input type="button" id="start-button" class="card-button" value="Start!">
+            </div>
+            <div id="network-start-div" class="hidden">
+              <p id="network-start-instructions">...</p>
+              <p id="network-address-error" class="error hidden">Sorry, looks like there was an error trying to get your local network address &#129301;</p>
+            </div>
+            <div class="delete-div">
+              <input type="button" id="delete-account-button" class="delete-button" value="Delete">
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--CONFIRM DELETE-->
+      <div id="confirm-delete-div" class="hidden">
+        <h1>Confirm Delete</h1>
+        <div class="card height-200 width-400">
+          <div class="padding-20">
+            <div class="height-200">
+              <p>This will delete all data associated with your Gateway Account. If you would like to keep your data, please hit cancel, otherwise press confirm</p>
+              <input type="button" id="cancel-delete-account-button" class="card-button" value="Cancel">
+              <input type="button" id="confirm-delete-account-button" class="delete-button" value="Delete">
+              <p id="delete-error" class="error hidden">Sorry, looks like there was an error while trying to delete your account &#129301;</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--LOGIN-->
+      <div id="login-div" class="hidden">
+        <input type="button" value="Back" class="back-button">
+        <h1>Login</h1>
+        <div class="card height-200 width-400">
+          <div class="padding-20">
+            <div class="height-200">
+              <p>
+                <label for="login-password">Password: </label>
+                <input type="password" id="login-password">
+              </p>
+              <input type="button" id="login-button" class="card-button" value="Login">
+              <p id="login-error" class="error hidden">Sorry, wrong password &#129301;</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
