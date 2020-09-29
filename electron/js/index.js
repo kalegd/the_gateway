@@ -105,9 +105,9 @@ $("#login-password").keypress(function(e) {
 
 $("#start-button").click(function() {
     if(navigator.onLine) {
-        shell.openExternal('https://thegateway.link');
+        shell.openExternal('https://app.thegateway.link?type=local');
     } else {
-        shell.openExternal('http://127.0.0.1:3100/local/');
+        shell.openExternal('http://127.0.0.1:3100?type=local');
     }
 });
 

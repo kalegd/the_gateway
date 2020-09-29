@@ -1,0 +1,43 @@
+body {
+    background-color: #FFFFFF;
+    overflow: hidden;
+    margin: 0px;
+    text-align:center;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#start, #loading.loading {
+    position: absolute;
+    top: 0px;
+    height: 100%;
+    width: 100%;
+    z-index: 100;
+    color: #FFF;
+    font-size: 50px;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: block;
+    justify-content: center;
+    align-items: center;
+}
+
+#start.removed, #start.loading, #loading, #mobile-start-button.removed {
+    display: none;
+}
+
+#mobile-start-button {
+    margin-top: 50px;
+    padding: 12px;
+    display: inline-block;
+    font-size: 4vw;
+    border-style: solid;
+    border-radius: 10px;
+}
+
+.hidden {
+    display: none;
+}

@@ -10,11 +10,17 @@ Database.init();
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.redirect('/local/');
-});
+// The following function can be uncommented for testing network delays
+// Use 'await sleep(2000);' in the endpoint to add a 2 second delay
+//function sleep(ms) {
+//  return new Promise(resolve => setTimeout(resolve, ms));
+//}
 
-app.use('/local', express.static('webserver/static'));
+//app.get('/', (req, res) => {
+//    res.redirect('/local/');
+//});
+
+app.use('/', express.static('webserver/static'));
 
 app.get('/users', async (req, res) => {
     let users;

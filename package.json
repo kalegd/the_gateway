@@ -33,6 +33,7 @@
     "jsonwebtoken": "^8.5.1",
     "nedb-promises": "^4.0.3",
     "sha.js": "^2.4.11",
+    "three": "^0.119.1",
     "uuidv4": "^6.1.1"
   }
 }

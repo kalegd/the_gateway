@@ -53,7 +53,9 @@ body {
 }
 
 .back-button {
-    float: left;
+    position: absolute;
+    left: 0;
+    top: 2px;
     margin-top: 2px;
     margin-left: 20px;
     color: #fff;
