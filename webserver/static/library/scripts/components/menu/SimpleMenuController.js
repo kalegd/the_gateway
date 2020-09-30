@@ -27,29 +27,6 @@ class SimpleMenuController {
         this._pageIndex--;
         this._pages[this._pageIndex].addToScene(this._scene);
     }
-
-    getInteractables() {
-        if(this._pageIndex != null) {
-            return this._pages[this._pageIndex].getInteractables();
-        }
-    }
-
-    update() {
-        let interactables = this.getInteractables();
-        if(!interactables) {
-            return;
-        } else if(global.deviceType == "XR") {
-            ThreeMeshUIHelper.handleXRIntersections(interactables,
-                this._pointers['LEFT'], this._pointers['RIGHT']);
-        } else if(global.deviceType == "POINTER") {
-            //ThreeMeshUIHelper.handlePointerIntersections(interactables,
-            //    this._pointer);
-            ThreeMeshUIHelper.handlePointerIntersections(interactables);
-        } else if (global.deviceType == "MOBILE") {
-            ThreeMeshUIHelper.handleMobileIntersections(interactables);
-        }
-    }
-
 }
 
 export default SimpleMenuController;

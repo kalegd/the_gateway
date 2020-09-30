@@ -1,5 +1,6 @@
 import LoginSceneController from '/library/scripts/core/scenes/LoginSceneController.js';
 import UserController from '/library/scripts/core/assets/UserController.js';
+import PointerInteractableManager from '/library/scripts/core/interaction/PointerInteractableManager.js';
 import Background from '/library/scripts/core/resources/Background.js';
 
 import AudioHandler from '/library/scripts/core/handlers/AudioHandler.js';
@@ -71,7 +72,10 @@ export default class Main {
         this._sessionHandler = new SessionHandler({ "Orbit Controls": true });
         this._inputHandler = new InputHandler(this._renderer, this._user);
         this._audioHandler = new AudioHandler();
+        this._pointerInteractableManager = new PointerInteractableManager();
         global.inputHandler = this._inputHandler;
+        global.pointerInteractableManager = this._pointerInteractableManager;
+        this._dynamicAssets.push(this._pointerInteractableManager);
     }
 
     _createAssets() {

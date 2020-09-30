@@ -1,5 +1,6 @@
 import SimpleMenuController from '/library/scripts/components/menu/SimpleMenuController.js';
 
+import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import ValidKeys from '/library/scripts/core/resources/ValidKeys.js';
 import AmbientLight from '/library/scripts/core/assets/AmbientLight.js';
 import PointLight from '/library/scripts/core/assets/PointLight.js';
@@ -102,7 +103,6 @@ export default class LoginSceneController {
 
     update(timeDelta) {
         ThreeMeshUI.update();
-        this._menuController.update();
     }
 
     static getFields() {
@@ -143,19 +143,6 @@ class AccountsMenuController extends SimpleMenuController {
         this._passwordPage.setAccount(account);
         this._passwordPageActive = true;
     }
-
-    getInteractables() {
-        if(this._passwordPageActive) {
-            return this._passwordPage.getInteractables();
-        } else if(this._pageIndex != null) {
-            return this._pages[this._pageIndex].getInteractables().concat(this._testPage.getInteractables());
-        }
-    }
-
-    update() {
-        super.update();
-    }
-
 }
 
 class TestPage {
@@ -191,24 +178,25 @@ class TestPage {
             'fontSize': 0.2,
             'height': 0.6,
             'width': 1.2,
-            'ontrigger': () => { alert("Menu Button Clicked"); },
+            //'ontrigger': () => { alert("Menu Button Clicked"); },
+        });
+        let menuInteractable = new PointerInteractable(menuButton, () => {
+            alert("Menu Button Clicked");
         });
         this._container.add(menuButton);
-        this._interactables.push(menuButton);
-    }
-
-    getInteractables() {
-        return this._interactables;
+        this._interactables.push(menuInteractable);
     }
 
     addToScene(scene) {
         scene.add(this._container);
+        global.pointerInteractableManager.addInteractables(this._interactables);
     }
 
     removeFromScene() {
         if(this._container.parent) {
             this._container.parent.remove(this._container);
         }
+        global.pointerInteractableManager.removeInteractables(this._interactables);
     }
 }
 
@@ -256,9 +244,10 @@ class AccountsMenuPage {
                 'fontSize': 0.08,
                 'height': 0.1,
                 'width': 0.1,
-                'ontrigger': previousPageFunc,
             });
-            this._interactables.push(previousPage);
+            let interactable = new PointerInteractable(previousPage,
+                                                       previousPageFunc);
+            this._interactables.push(interactable);
         } else {
             previousPage = ThreeMeshUIHelper.createTextBlock({
                 'text': ' ',
@@ -281,14 +270,14 @@ class AccountsMenuPage {
                 'fontSize': 0.08,
                 'height': 0.1,
                 'width': 0.6,
-                'ontrigger': () => { 
-                    (accounts[i].isPasswordProtected)
-                        ? selectFunc(accounts[i])
-                        : this._login(accounts[i])
-                },
             });
             columnBlock.add(account);
-            this._interactables.push(account);
+            let interactable = new PointerInteractable(account, () => {
+                (accounts[i].isPasswordProtected)
+                    ? selectFunc(accounts[i])
+                    : this._login(accounts[i]);
+            });
+            this._interactables.push(interactable);
         }
         let nextPage;
         if(nextPageFunc) {
@@ -297,9 +286,10 @@ class AccountsMenuPage {
                 'fontSize': 0.08,
                 'height': 0.1,
                 'width': 0.1,
-                'ontrigger': nextPageFunc,
             });
-            this._interactables.push(nextPage);
+            let interactable = new PointerInteractable(nextPage,
+                                                       nextPageFunc);
+            this._interactables.push(interactable);
         } else {
             nextPage = ThreeMeshUIHelper.createTextBlock({
                 'text': ' ',
@@ -312,6 +302,8 @@ class AccountsMenuPage {
         rowBlock.add(columnBlock);
         rowBlock.add(nextPage);
         this._container.add(rowBlock);
+        let interactable = new PointerInteractable(this._container);
+        this._interactables.push(interactable);
     }
 
     _login(account) {
@@ -340,18 +332,16 @@ class AccountsMenuPage {
         });
     }
 
-    getInteractables() {
-        return (this._waitingOnRequest) ? [] : this._interactables;
-    }
-
     addToScene(scene) {
         scene.add(this._container);
+        global.pointerInteractableManager.addInteractables(this._interactables);
     }
 
     removeFromScene() {
         if(this._container.parent) {
             this._container.parent.remove(this._container);
         }
+        global.pointerInteractableManager.removeInteractables(this._interactables);
     }
 }
 
@@ -362,7 +352,6 @@ class PasswordEntryPage {
         this._setupEventListeners();
         this._createPage();
         this._addPageContent(backFunc);
-        this._waitingOnRequest = false;
     }
 
     _setupEventListeners() {
@@ -407,22 +396,25 @@ class PasswordEntryPage {
             'fontSize': 0.08,
             'height': 0.2,
             'width': 0.9,
-            'ontrigger': () => { this._activate(); },
         });
+        let passwordInteractable = new PointerInteractable(this._passwordBlock,
+            () => { this._activate(); });
         this._loginButton = ThreeMeshUIHelper.createButtonBlock({
             'text': "Login",
             'fontSize': 0.08,
             'height': 0.1,
             'width': 0.4,
-            'ontrigger': () => { this._login(); },
         });
+        let loginInteractable = new PointerInteractable(this._loginButton,
+            () => { this._login(); });
         this._backButton = ThreeMeshUIHelper.createButtonBlock({
             'text': "Back",
             'fontSize': 0.08,
             'height': 0.1,
             'width': 0.4,
-            'ontrigger': () => { this._reset(); backFunc(); },
         });
+        let backInteractable = new PointerInteractable(this._backButton,
+            () => { this._reset(); backFunc(); });
         this._wrongPasswordMessage = ThreeMeshUIHelper.createTextBlock({
             'text': 'Incorrect Password',
             'fontColor': new THREE.Color(0x9c0006),
@@ -438,13 +430,15 @@ class PasswordEntryPage {
         this._container.add(this._wrongPasswordMessage);
         this._container.add(this._loginButton);
         this._container.add(this._backButton);
-        this._interactables.push(this._passwordBlock);
-        this._interactables.push(this._loginButton);
-        this._interactables.push(this._backButton);
+        this._interactables.push(passwordInteractable);
+        this._interactables.push(loginInteractable);
+        this._interactables.push(backInteractable);
+        let interactable = new PointerInteractable(this._container);
+        this._interactables.push(interactable);
     }
 
     _appendToPasswordContent(str) {
-        this._password += str;
+        //this._password += str;
         this._updateDisplayedPasswordWithCursor();
     }
 
@@ -516,7 +510,7 @@ class PasswordEntryPage {
     }
 
     _login() {
-        this._waitingOnRequest = true;
+        global.pointerInteractableManager.removeInteractables(this._interactables);
         this._loginButton.visible = false;
         this._backButton.visible = false;
         this._wrongPasswordMessage.visible = false;
@@ -533,19 +527,15 @@ class PasswordEntryPage {
                 console.log("TODO: Go to Home Screen");
                 this._loginButton.visible = true;
                 this._backButton.visible = true;
-                this._waitingOnRequest = false;
+                global.pointerInteractableManager.addInteractables(this._interactables);
             },
             error: (xhr, status, error) => {
                 this._loginButton.visible = true;
                 this._backButton.visible = true;
                 this._wrongPasswordMessage.visible = true;
-                this._waitingOnRequest = false;
+                global.pointerInteractableManager.addInteractables(this._interactables);
             }
         });
-    }
-
-    getInteractables() {
-        return (this._waitingOnRequest) ? [] : this._interactables;
     }
 
     setAccount(account) {
@@ -554,11 +544,13 @@ class PasswordEntryPage {
 
     addToScene(scene) {
         scene.add(this._container);
+        global.pointerInteractableManager.addInteractables(this._interactables);
     }
 
     removeFromScene() {
         if(this._container.parent) {
             this._container.parent.remove(this._container);
         }
+        global.pointerInteractableManager.removeInteractables(this._interactables);
     }
 }

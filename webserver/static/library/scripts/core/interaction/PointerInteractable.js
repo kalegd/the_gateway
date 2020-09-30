@@ -3,9 +3,9 @@ import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper
 import States from '/library/scripts/core/enums/PointerInteractableStates.js';
 
 class PointerInteractable {
-    constructor(threeObj) {
+    constructor(threeObj, actionFunc) {
         this._threeObj = threeObj;
-        this._actionFunc;
+        this._actionFunc = actionFunc;
         this._state = States.IDLE;
         this._hoveredOwners = new Set();
         this._selectedOwners = new Set();
@@ -22,6 +22,9 @@ class PointerInteractable {
     setState(newState) {
         if(this._state != newState) {
             this._state = newState;
+            if(this._threeObj.states && newState in this._threeObj.states) {
+                this._threeObj.setState(newState);
+            }
         }
     }
 
@@ -48,7 +51,7 @@ class PointerInteractable {
     }
 
     removeHoveredBy(owner) {
-        this._hoveredOwners.remove(owner);
+        this._hoveredOwners.delete(owner);
         this._determineAndSetState();
     }
 
@@ -58,14 +61,14 @@ class PointerInteractable {
     }
 
     removeSelectedBy(owner) {
-        this._selectedOwners.remove(owner);
+        this._selectedOwners.delete(owner);
         this._determineAndSetState();
     }
 
     reset() {
         this._hoveredOwners.clear();
         this._selectedOwners.clear();
-        this._setState(States.IDLE);
+        this.setState(States.IDLE);
     }
 }
 

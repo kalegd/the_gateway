@@ -1,4 +1,5 @@
 import global from '/library/scripts/core/resources/global.js';
+import States from '/library/scripts/core/enums/PointerInteractableStates.js';
 import * as THREE from '/library/scripts/three/build/three.module.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
 
@@ -55,7 +56,7 @@ export default class ThreeMeshUIHelper {
         let height = (params['height']) ? params['height'] : 0.15;
         let width = (params['width']) ? params['width'] : 0.7;
         let margin = (params['margin']) ? params['margin'] : 0.02;
-        let ontrigger = (params['ontrigger']) ? params['ontrigger'] : () => {};
+        //let ontrigger = (params['ontrigger']) ? params['ontrigger'] : () => {};
         let buttonBlock = new ThreeMeshUI.Block({
             height: height,
             width: width,
@@ -70,7 +71,7 @@ export default class ThreeMeshUIHelper {
         });
         buttonBlock.add(buttonText);
         buttonBlock.setupState({
-            state: "idle",
+            state: States.IDLE,
             attributes: {
                 offset: 0.02,
                 backgroundOpacity: 0.7,
@@ -81,7 +82,7 @@ export default class ThreeMeshUIHelper {
             //}
         });
         buttonBlock.setupState({
-            state: "hovered",
+            state: States.HOVERED,
             attributes: {
                 offset: 0.02,
                 backgroundOpacity: 0.8,
@@ -92,7 +93,7 @@ export default class ThreeMeshUIHelper {
             //}
         });
         buttonBlock.setupState({
-            state: "selected",
+            state: States.SELECTED,
             attributes: {
                 offset: 0.01,
                 backgroundOpacity: 0.8,
@@ -102,10 +103,10 @@ export default class ThreeMeshUIHelper {
             //    console.log("Selected button!");
             //}
         });
-        buttonBlock.setState('idle');
+        buttonBlock.setState(States.IDLE);
         buttonBlock.customField = "BUTTON";
         buttonBlock.selectedOwners = new Set();
-        buttonBlock.ontrigger = ontrigger;
+        //buttonBlock.ontrigger = ontrigger;
         return buttonBlock;
     }
 
@@ -179,11 +180,11 @@ export default class ThreeMeshUIHelper {
                     raycasted = true;
                     if(isButton) {
                         if(isPressed) {
-                            if(interactable.currentState == "hovered" || isMobile) {
+                            if(interactable.currentState == States.HOVERED || isMobile) {
                                 if(!interactable.selectedOwners.has(option)) {
                                     interactable.selectedOwners.add(option);
                                 }
-                                interactable.setState("selected");
+                                interactable.setState(States.SELECTED);
                             }
                         } else {
                             if(interactable.selectedOwners.has(option)) {
@@ -191,11 +192,11 @@ export default class ThreeMeshUIHelper {
                                 //Signal trigger button action
                                 shouldTrigger = true;
                             }
-                            if(interactable.currentState != "hovered"
+                            if(interactable.currentState != States.HOVERED
                                 && interactable.selectedOwners.size == 0
                                 && !isMobile)
                             {
-                                interactable.setState("hovered");
+                                interactable.setState(States.HOVERED);
                             }
                         }
                     }
@@ -206,11 +207,11 @@ export default class ThreeMeshUIHelper {
                 }
             }
             if(isButton && !raycasted && interactable.selectedOwners.size == 0) {
-                interactable.setState("idle");
+                interactable.setState(States.IDLE);
             }
             // We run "ontrigger" at the end because if "ontrigger" involves
             // removing the UI element, we run into issues with the state
-            // change to "hovered" afterwards
+            // change to States.HOVERED afterwards
             if(shouldTrigger) {
                 interactable.ontrigger();
             }

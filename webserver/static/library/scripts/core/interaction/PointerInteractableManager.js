@@ -9,9 +9,9 @@ class PointerInteractableManager {
         this._selectedInteractables = {};
         if(global.deviceType == "XR") {
             this.update = this._updateForXR;
-        } else if(global.devicetype == "POINTER") {
+        } else if(global.deviceType == "POINTER") {
             this.update = this._updateForPointer;
-        } else if(global.devicetype == "MOBILE") {
+        } else if(global.deviceType == "MOBILE") {
             this.update = this._updateForMobile;
         } else {
             this.update = () => {};
@@ -24,19 +24,26 @@ class PointerInteractableManager {
         interactables.forEach((interactable) => {
             this._interactables.add(interactable);
         });
-        if(this._interactables.size() > 0) {
+        if(this._interactables.size > 0) {
             this.update = this._update;
         }
     }
 
     removeInteractables(interactables) {
         interactables.forEach((interactable) => {
-            this._interactables.remove(interactable);
+            this._interactables.delete(interactable);
             interactable.reset();
         });
-        if(this._interactables.size() == 0) {
+        if(this._interactables.size == 0) {
             this.update = () => {};
         }
+    }
+
+    reset() {
+        this._interactables.forEach(interactable => { interactable.reset(); });
+        this._interactables = new Set();
+        this._hoveredInteractables = {};
+        this._selectedInteractables = {};
     }
 
     _getRaycaster(option) {
@@ -61,6 +68,17 @@ class PointerInteractableManager {
         }
     }
 
+    _isControllerPressed(option) {
+        if(option == "LEFT" || option == "RIGHT") {
+            let gamepad = global.inputHandler.getXRGamepad(option);
+            return gamepad != null && gamepad.buttons[0].pressed;
+        } else if(option == "POINTER") {
+            return global.inputHandler.isPointerPressed();
+        } else if(option == "MOBILE") {
+            return global.inputHandler.isScreenTouched();
+        }
+    }
+
     _raycastInteractables(controllers) {
         for(let option in controllers) {
             let controller = controllers[option];
@@ -73,7 +91,7 @@ class PointerInteractableManager {
                 if(raycaster == null) {
                     intersections = [];
                 } else {
-                    intersections = raycaster.intersectObject(interactable, true);
+                    intersections = raycaster.intersectObject(threeObj, true);
                 }
                 if(intersections.length != 0) {
                     let distance = intersections[0].distance;
@@ -87,16 +105,18 @@ class PointerInteractableManager {
             let hoveredInteractable = this._hoveredInteractables[option];
             let selectedInteractable = this._selectedInteractables[option];
             if(closestInteractable) {
-                if(isPressed)
+                if(isPressed) {
                     if(hoveredInteractable == closestInteractable) {
                         closestInteractable.addSelectedBy(option);
                         this._selectedInteractables[option] = closestInteractable;
+                        closestInteractable.removeHoveredBy(option);
+                        this._hoveredInteractables[option] = null;
                     }
-                    closestInteractable.removeHoveredBy(option);
-                    this._hoveredInteractables[option] = null;
                 } else {
                     if(hoveredInteractable != closestInteractable) {
-                        hoveredInteractable.removeHoveredBy(option);
+                        if(hoveredInteractable) {
+                            hoveredInteractable.removeHoveredBy(option);
+                        }
                         closestInteractable.addHoveredBy(option);
                         this._hoveredInteractables[option] = closestInteractable;
                     }
@@ -104,12 +124,14 @@ class PointerInteractableManager {
                         selectedInteractable.removeSelectedBy(option);
                     }
                 }
-            } else {
+            } else if(!isPressed) {
                 if(hoveredInteractable) {
                     hoveredInteractable.removeHoveredBy(option);
+                    this._hoveredInteractables[option] = null;
                 }
                 if(selectedInteractable) {
                     selectedInteractable.removeSelectedBy(option);
+                    this._selectedInteractables[option] = null;
                 }
             }
         }
@@ -141,7 +163,7 @@ class PointerInteractableManager {
             }
         };
 
-        this._raycastUI(controllers);
+        this._raycastInteractables(controllers);
     }
 
     _updateForMobile() {

@@ -1,7 +1,7 @@
 const PointerInteractableStates = {
-    IDLE: {},
-    HOVERED: {},
-    SELECTED: {}
+    IDLE: "IDLE",
+    HOVERED: "HOVERED",
+    SELECTED: "SELECTED"
 };
 
 export default PointerInteractableStates;
