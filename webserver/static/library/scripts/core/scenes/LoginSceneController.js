@@ -438,7 +438,7 @@ class PasswordEntryPage {
     }
 
     _appendToPasswordContent(str) {
-        //this._password += str;
+        this._password += str;
         this._updateDisplayedPasswordWithCursor();
     }
 
