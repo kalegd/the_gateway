@@ -103,6 +103,7 @@ export default class LoginSceneController {
 
     update(timeDelta) {
         ThreeMeshUI.update();
+        global.pointerInteractableManager.update();
     }
 
     static getFields() {

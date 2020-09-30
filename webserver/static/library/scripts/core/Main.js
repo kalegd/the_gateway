@@ -75,7 +75,6 @@ export default class Main {
         this._pointerInteractableManager = new PointerInteractableManager();
         global.inputHandler = this._inputHandler;
         global.pointerInteractableManager = this._pointerInteractableManager;
-        this._dynamicAssets.push(this._pointerInteractableManager);
     }
 
     _createAssets() {
