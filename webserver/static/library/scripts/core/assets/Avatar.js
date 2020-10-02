@@ -23,6 +23,9 @@ export default class Avatar {
         //this._pivotPoint.position.setY(1.3);
 
         this._createMesh((params['URL']) ? params['URL'] : this._defaultURL);
+        if(this._focusCamera) {
+            global.cameraFocus.position.fromArray(this._cameraFocalPoint);
+        }
     }
 
     _createBoundingBox(params) {
@@ -61,9 +64,6 @@ export default class Avatar {
                 hands.forEach((hand) => { hand.parent.remove(hand); });
                 this._pivotPoint.add(gltf.scene);
                 this._dimensions = 3;
-                if(this._focusCamera) {
-                    global.cameraFocus.position.fromArray(this._cameraFocalPoint);
-                }
             }, () => {}, (error) => {
                 console.log(error);
                 if(filename != this._defaultURL) {

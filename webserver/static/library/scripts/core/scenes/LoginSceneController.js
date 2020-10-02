@@ -1,19 +1,21 @@
 import SimpleMenuController from '/library/scripts/components/menu/SimpleMenuController.js';
 
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
-import ValidKeys from '/library/scripts/core/resources/ValidKeys.js';
 import AmbientLight from '/library/scripts/core/assets/AmbientLight.js';
 import PointLight from '/library/scripts/core/assets/PointLight.js';
+//import TestPage from '/library/scripts/core/pages/TestPage.js';
+import ValidKeys from '/library/scripts/core/resources/ValidKeys.js';
 import global from '/library/scripts/core/resources/global.js';
 import * as THREE from '/library/scripts/three/build/three.module.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
 import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper.js';
+import {
+    FONT_FAMILY,
+    FONT_TEXTURE,
+    UI_BACKGROUND_COLOR,
+    UI_BACKGROUND_OPACITY
+} from '/library/scripts/core/resources/constants.js';
   
-var FONT_FAMILY = "/library/fonts/OpenSans-Regular-msdf.json";
-var FONT_TEXTURE = "/library/fonts/OpenSans-Regular-msdf.png";
-var UI_BACKGROUND_COLOR = new THREE.Color(0x000000);
-var UI_BACKGROUND_OPACITY = 0.5;
-
 export default class LoginSceneController {
     constructor() {
         this._pivotPoint = new THREE.Object3D();
@@ -35,6 +37,9 @@ export default class LoginSceneController {
         //let material = new THREE.MeshStandardMaterial( {color: 0x00ff00} );
         //let cube = new THREE.Mesh( geometry, material );
         //this._pivotPoint.add(cube);
+
+        //let testPage = new TestPage();
+        //testPage.addToScene(this._pivotPoint);
     }
 
     _fetchUsers() {
@@ -52,6 +57,7 @@ export default class LoginSceneController {
                 //      server
                 console.log("TODO: Need to inform user we can't connect to the "
                             + "gateway server");
+                this._initNetworkErrorMenu();
             }
         });
     }
@@ -88,6 +94,13 @@ export default class LoginSceneController {
         }
     }
 
+    _initNetworkErrorMenu() {
+        let errorPage = new NetworkErrorPage();
+        this._menuController.addPage(errorPage);
+        errorPage.addToScene(this._pivotPoint);
+
+    }
+
     addToScene(scene) {
         scene.add(this._pivotPoint);
     }
@@ -122,8 +135,6 @@ class AccountsMenuController extends SimpleMenuController {
             this._passwordPageActive = false;
         });
         this._passwordPageActive = false;
-        this._testPage = new TestPage();
-        this._testPage.addToScene(scene);
     }
 
     addPage(page) {
@@ -146,7 +157,7 @@ class AccountsMenuController extends SimpleMenuController {
     }
 }
 
-class TestPage {
+class NetworkErrorPage {
     constructor() {
         this._interactables = [];
         this._createPage();
@@ -161,28 +172,30 @@ class TestPage {
             backgroundOpacity: UI_BACKGROUND_OPACITY,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
-            'text': 'Accounts',
+            'text': "Could not connect to your Gateway Server",
             'fontSize': 0.1,
-            'height': 0.2,
-            'width': 0.5,
+            'height': 0.4,
+            'width': 1.2,
         });
         this._container.add(titleBlock);
         this._container.set({ fontFamily: FONT_FAMILY, fontTexture: FONT_TEXTURE });
         this._container.rotateY(Math.PI);
         this._container.position.setY(0.7);
-        this._container.position.setZ(3);
+        this._container.position.setZ(2);
+
+        let interactable = new PointerInteractable(this._container.children[0]);
+        this._interactables.push(interactable);
     }
 
     _addPageContent(accounts, selectFunc, previousPageFunc, nextPageFunc) {
         let menuButton = ThreeMeshUIHelper.createButtonBlock({
-            'text': 'Click Me!!',
-            'fontSize': 0.2,
-            'height': 0.6,
-            'width': 1.2,
-            //'ontrigger': () => { alert("Menu Button Clicked"); },
+            'text': 'Refresh Page',
+            'fontSize': 0.08,
+            'height': 0.1,
+            'width': 0.6,
         });
         let menuInteractable = new PointerInteractable(menuButton, () => {
-            alert("Menu Button Clicked");
+            location.reload();
         });
         this._container.add(menuButton);
         this._interactables.push(menuInteractable);
@@ -227,6 +240,9 @@ class AccountsMenuPage {
         this._container.rotateY(Math.PI);
         this._container.position.setY(0.7);
         this._container.position.setZ(2);
+
+        let interactable = new PointerInteractable(this._container.children[0]);
+        this._interactables.push(interactable);
     }
 
     _addPageContent(accounts, selectFunc, previousPageFunc, nextPageFunc) {
@@ -303,8 +319,6 @@ class AccountsMenuPage {
         rowBlock.add(columnBlock);
         rowBlock.add(nextPage);
         this._container.add(rowBlock);
-        let interactable = new PointerInteractable(this._container);
-        this._interactables.push(interactable);
     }
 
     _login(account) {
@@ -389,6 +403,9 @@ class PasswordEntryPage {
         this._container.rotateY(Math.PI);
         this._container.position.setY(0.7);
         this._container.position.setZ(2);
+
+        let interactable = new PointerInteractable(this._container.children[0]);
+        this._interactables.push(interactable);
     }
 
     _addPageContent(backFunc) {
@@ -434,8 +451,6 @@ class PasswordEntryPage {
         this._interactables.push(passwordInteractable);
         this._interactables.push(loginInteractable);
         this._interactables.push(backInteractable);
-        let interactable = new PointerInteractable(this._container);
-        this._interactables.push(interactable);
     }
 
     _appendToPasswordContent(str) {
