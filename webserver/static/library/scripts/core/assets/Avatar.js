@@ -6,6 +6,7 @@ export default class Avatar {
         if(params == null) {
             params = {};
         }
+        this._userObj = params['User Object'];
         this._focusCamera = (params['Focus Camera'])
             ? params['Focus Camera']
             : false;
@@ -114,9 +115,11 @@ export default class Avatar {
     }
 
     lookAtLocal(point) {
-        this._vector3.copy(point);
-        global.user.localToWorld(this._vector3);
-        this._pivotPoint.lookAt(this._vector3);
+        if(this._userObj) {
+            this._vector3.copy(point);
+            this._userObj.localToWorld(this._vector3);
+            this._pivotPoint.lookAt(this._vector3);
+        }
     }
 
     addToScene(scene) {

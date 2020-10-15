@@ -7,6 +7,7 @@ export default class BasicMovement {
             params = {};
         }
         this._avatar = params['Avatar'];
+        this._userObj = params['User Object'];
         this._vector = new THREE.Vector3();//For any vector calculations
         this._vector2 = new THREE.Vector3();
         this._velocity = new THREE.Vector3();
@@ -24,17 +25,17 @@ export default class BasicMovement {
         // move forward parallel to the xz-plane
         // assumes camera.up is y-up
         this._vector.setFromMatrixColumn(global.camera.matrixWorld, 0);
-        this._vector.crossVectors(global.user.up, this._vector);
+        this._vector.crossVectors(this._userObj.up, this._vector);
         // not using addScaledVector because we use this._vector later
         this._vector.multiplyScalar(distance);
-        global.user.position.add(this._vector);
+        this._userObj.position.add(this._vector);
     };
 
     _moveRight(distance) {
         this._vector.setFromMatrixColumn(global.camera.matrixWorld, 0);
         this._vector.y = 0;
         this._vector.multiplyScalar(distance);
-        global.user.position.add(this._vector);
+        this._userObj.position.add(this._vector);
     };
 
     update(timeDelta) {

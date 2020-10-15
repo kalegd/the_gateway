@@ -1,3 +1,4 @@
+import { disposeMaterial } from '/library/scripts/core/resources/utils.module.js';
 import { CubeTextureLoader } from '/library/scripts/three/build/three.module.js';
   
 class Background {
@@ -42,7 +43,11 @@ class Background {
                 "front" + extension,
                 "back" + extension,
             ], function(texture) {
+                let oldBackground = global.scene.background;
                 global.scene.background = texture;
+                if(oldBackground) {
+                    disposeMaterial(oldBackground);
+                }
             });
     }
 }

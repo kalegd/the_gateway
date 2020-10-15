@@ -1,14 +1,17 @@
 const Database = require('./Database.js');
+const UserUtils = require('./utilities/UserUtils.js');
 const express = require('express');
 const internalIp = require('internal-ip');
 const jwt = require('jsonwebtoken');
 const shajs = require('sha.js');
+//const cors = require('cors');
 const app = express();
 const port = 3100;
 
 Database.init();
 
 app.use(express.json());
+//app.use(cors());
 
 // The following function can be uncommented for testing network delays
 // Use 'await sleep(2000);' in the endpoint to add a 2 second delay
@@ -27,10 +30,29 @@ app.get('/users', async (req, res) => {
     let userIds = await Database.getOne("userIds");
     if(userIds) {
         users = await Database.getAll(userIds.ids);
+        UserUtils.filterPersonalInformation(users);
     } else {
         users = [];
     }
     res.send({ data: users });
+});
+
+app.get('/user', async (req, res) => {
+    let authRecord = UserUtils.getAuthRecord(req);
+    if(!authRecord) {
+        res.status(401);
+        res.send({ "message": "Invalid Auth Token" });
+        return;
+    }
+    let userId = authRecord.userId;
+    let user = await Database.getOne(userId);
+    if(user == null) {
+        res.status(404);
+        res.send();
+        return;
+    }
+    delete user.password;
+    res.send({ data: user });
 });
 
 app.post('/user', async (req, res) => {
@@ -52,6 +74,16 @@ app.post('/user', async (req, res) => {
 });
 
 app.delete('/user', async (req, res) => {
+    let authRecord = UserUtils.getAuthRecord(req);
+    if(!authRecord) {
+        res.status(401);
+        res.send({ "message": "Invalid Auth Token" });
+        return;
+    } else if(authRecord.userId != req.body.id) {
+        res.status(403);
+        res.send({ "message": "You do not have permission for this action" });
+        return;
+    }
     let result = await Database.delete(req.body.id);
     if(result) {
         res.send({});
@@ -59,6 +91,25 @@ app.delete('/user', async (req, res) => {
         res.status(404);
         res.send();
     }
+});
+
+app.get('/assets', async (req, res) => {
+    let authRecord = UserUtils.getAuthRecord(req);
+    if(!authRecord) {
+        res.status(401);
+        res.send({ "message": "Invalid Auth Token" });
+        return;
+    }
+    let userId = authRecord.userId;
+    let user = await Database.getOne(userId);
+    if(!user) {
+        res.status(404);
+        res.send();
+        return;
+    }
+    let assets = await Database.getAll(user.assetIds);
+    assets.forEach((asset) => { asset['owners'] = null; });
+    res.send({ data: assets });
 });
 
 app.post('/login', async (req, res) => {

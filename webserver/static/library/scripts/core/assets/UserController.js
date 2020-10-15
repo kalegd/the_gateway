@@ -10,18 +10,20 @@ export default class UserController {
             params = {};
         }
         this._dynamicAssets = [];
-        this._user = global.user;
+        this._userObj = params['User Object'];
 
         this._setup();
     }
 
     _setup() {
         this._avatar = new Avatar({
-            "Focus Camera": true,
+            'User Object': this._userObj,
+            'Focus Camera': true,
         });
-        this._avatar.addToScene(this._user);
+        this._avatar.addToScene(this._userObj);
         if(BasicMovement.isDeviceTypeSupported(global.deviceType)) {
             let basicMovement = new BasicMovement({
+                'User Object': this._userObj,
                 'Avatar': this._avatar,
                 'Movement Speed (m/s)': 2,
             });
@@ -30,7 +32,7 @@ export default class UserController {
     }
 
     addToScene() {
-        this._avatar.addToScene(this._user);
+        this._avatar.addToScene(this._userObj);
     }
 
     removeFromScene() {

@@ -1,7 +1,9 @@
 import LoginSceneController from '/library/scripts/core/scenes/LoginSceneController.js';
+import HomeSceneController from '/library/scripts/core/scenes/HomeSceneController.js';
 import UserController from '/library/scripts/core/assets/UserController.js';
 import PointerInteractableManager from '/library/scripts/core/interaction/PointerInteractableManager.js';
 import Background from '/library/scripts/core/resources/Background.js';
+import SceneNames from '/library/scripts/core/enums/SceneNames.js';
 
 import AudioHandler from '/library/scripts/core/handlers/AudioHandler.js';
 import InputHandler from '/library/scripts/core/handlers/InputHandler.js';
@@ -20,6 +22,7 @@ export default class Main {
         this._loadingMessage = document.querySelector('#loading');
         this._dynamicAssets = [];
         global.loadingAssets = new Set();
+        global.changeScene = (sceneName) => { this.changeScene(sceneName) };
 
         this._createRenderer();
         this._createScene();
@@ -47,7 +50,7 @@ export default class Main {
     }
 
     _createUser() {
-        this._user = new THREE.Object3D();
+        this._userObj = new THREE.Object3D();
         this._cameraFocus = new THREE.Object3D();
         this._camera = new THREE.PerspectiveCamera(
             45, //Field of View Angle
@@ -61,16 +64,15 @@ export default class Main {
             this._camera.position.setZ(-1.9);
         }
         this._cameraFocus.add(this._camera);
-        this._user.add(this._cameraFocus);
-        this._scene.add(this._user);
-        global.user = this._user;
+        this._userObj.add(this._cameraFocus);
+        this._scene.add(this._userObj);
         global.camera = this._camera;
         global.cameraFocus = this._cameraFocus;
     }
 
     _createHandlers() {
         this._sessionHandler = new SessionHandler({ "Orbit Controls": true });
-        this._inputHandler = new InputHandler(this._renderer, this._user);
+        this._inputHandler = new InputHandler(this._renderer, this._userObj);
         this._audioHandler = new AudioHandler();
         this._pointerInteractableManager = new PointerInteractableManager();
         global.inputHandler = this._inputHandler;
@@ -83,14 +85,22 @@ export default class Main {
             "File Extension": ".jpg"
         });
 
-        let loginSceneController = new LoginSceneController();
-        let userController = new UserController();
+        //let loginSceneController = new LoginSceneController();
+        //let userController = new UserController();
 
-        loginSceneController.addToScene(this._scene);
-        userController.addToScene();
+        //loginSceneController.addToScene(this._scene);
+        //userController.addToScene();
 
-        this._dynamicAssets.push(userController);
-        this._dynamicAssets.push(loginSceneController);
+        //this._dynamicAssets.push(userController);
+        //this._dynamicAssets.push(loginSceneController);
+
+        this._sceneController = new LoginSceneController();
+        this._userController = new UserController({
+            'User Object': this._userObj,
+        });
+
+        this._sceneController.addToScene(this._scene);
+        this._userController.addToScene();
     }
 
     _addEventListeners() {
@@ -147,9 +157,31 @@ export default class Main {
             global.physicsScene.simulate(timeDelta, true);
             global.physicsScene.fetchResults(true);
         }
-        for(let i = 0; i < this._dynamicAssets.length; i++) {
-            this._dynamicAssets[i].update(timeDelta);
-        }
+        this._userController.update(timeDelta);
+        this._sceneController.update(timeDelta);
+        //for(let i = 0; i < this._dynamicAssets.length; i++) {
+        //    this._dynamicAssets[i].update(timeDelta);
+        //}
         this._renderer.render(this._scene, this._camera);
+    }
+
+    changeScene(sceneName) {
+        if(sceneName == SceneNames.LOGIN) {
+            this._sceneController.removeFromScene();
+            this._sceneController = new LoginSceneController();
+            this._sceneController.addToScene(this._scene);
+            Background.setToSkybox({
+                "Path": "/library/backgrounds/space_compressed/",
+                "File Extension": ".jpg"
+            });
+        } else if(sceneName == SceneNames.HOME) {
+            Background.setToSkybox({
+                "Path": "/library/backgrounds/blue_sky_compressed/",
+                "File Extension": ".jpg"
+            });
+            this._sceneController.removeFromScene();
+            this._sceneController = new HomeSceneController();
+            this._sceneController.addToScene(this._scene);
+        }
     }
 }

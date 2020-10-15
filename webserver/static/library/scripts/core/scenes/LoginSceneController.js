@@ -1,20 +1,23 @@
 import SimpleMenuController from '/library/scripts/components/menu/SimpleMenuController.js';
 
-import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import AmbientLight from '/library/scripts/core/assets/AmbientLight.js';
 import PointLight from '/library/scripts/core/assets/PointLight.js';
+import SceneNames from '/library/scripts/core/enums/SceneNames.js';
+import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 //import TestPage from '/library/scripts/core/pages/TestPage.js';
-import ValidKeys from '/library/scripts/core/resources/ValidKeys.js';
-import global from '/library/scripts/core/resources/global.js';
-import * as THREE from '/library/scripts/three/build/three.module.js';
-import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
-import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper.js';
 import {
     FONT_FAMILY,
     FONT_TEXTURE,
     UI_BACKGROUND_COLOR,
     UI_BACKGROUND_OPACITY
 } from '/library/scripts/core/resources/constants.js';
+import global from '/library/scripts/core/resources/global.js';
+import ValidKeys from '/library/scripts/core/resources/ValidKeys.js';
+import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
+
+import * as THREE from '/library/scripts/three/build/three.module.js';
+import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
+import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper.js';
   
 export default class LoginSceneController {
     constructor() {
@@ -53,10 +56,6 @@ export default class LoginSceneController {
                 this._initMenu(users);
             },
             error: (xhr, status, error) => {
-                //TODO: Need to inform user we can't connect to the gateway
-                //      server
-                console.log("TODO: Need to inform user we can't connect to the "
-                            + "gateway server");
                 this._initNetworkErrorMenu();
             }
         });
@@ -64,12 +63,8 @@ export default class LoginSceneController {
 
     _initMenu(users) {
         let selectFunc = (account) => {
-            //console.log(account);
             if(account.isPasswordProtected) {
                 this._menuController.goToPasswordPageFor(account);
-            } else {
-                //TODO: Go to the Home Screen
-                console.log("TODO: Go to Home Screen");
             }
         };
         for(let i = 0; i < users.length; i += 5) {
@@ -98,7 +93,6 @@ export default class LoginSceneController {
         let errorPage = new NetworkErrorPage();
         this._menuController.addPage(errorPage);
         errorPage.addToScene(this._pivotPoint);
-
     }
 
     addToScene(scene) {
@@ -106,6 +100,7 @@ export default class LoginSceneController {
     }
 
     removeFromScene() {
+        global.pointerInteractableManager.reset();
         this._pivotPoint.parent.remove(this._pivotPoint);
         fullDispose(this._pivotPoint);
     }
@@ -187,7 +182,7 @@ class NetworkErrorPage {
         this._interactables.push(interactable);
     }
 
-    _addPageContent(accounts, selectFunc, previousPageFunc, nextPageFunc) {
+    _addPageContent() {
         let menuButton = ThreeMeshUIHelper.createButtonBlock({
             'text': 'Refresh Page',
             'fontSize': 0.08,
@@ -332,11 +327,10 @@ class AccountsMenuPage {
             contentType: 'application/json',
             dataType: 'json',
             success: (response) => {
-                let jwt = response.data;
-                //TODO: Go to the Home Screen
-                console.log("TODO: Go to Home Screen");
+                global.jwt = response.data;
                 this._waitingOnRequest = false;
                 this._container.visible = true;
+                global.changeScene(SceneNames.HOME);
             },
             error: (xhr, status, error) => {
                 this._waitingOnRequest = false;
@@ -492,21 +486,21 @@ class PasswordEntryPage {
         }
         if(global.deviceType == "XR") {
             //TODO: Add XR functionality for _activate()
-            console.log("TODO: Add XR functionality for _activate()");
+            console.warn("TODO: Add XR functionality for _activate()");
         } else if(global.deviceType == "POINTER") {
             document.addEventListener("keydown", this._keyListener);
             document.addEventListener("click", this._clickListener);
             global.keyboardLock = true;
         } else if (global.deviceType == "MOBILE") {
             //TODO: Add Mobile functionality for _activate()
-            console.log("TODO: Add Mobile functionality for _activate()");
+            console.warn("TODO: Add Mobile functionality for _activate()");
         }
     }
 
     _deactivate() {
         if(global.deviceType == "XR") {
             //TODO: Add XR functionality for _deactivate()
-            console.log("TODO: Add XR functionality for _deactivate()");
+            console.warn("TODO: Add XR functionality for _deactivate()");
         } else if(global.deviceType == "POINTER") {
             document.removeEventListener("keydown", this._keyListener);
             document.removeEventListener("click", this._clickListener);
@@ -514,7 +508,7 @@ class PasswordEntryPage {
             this._removeCursor();
         } else if (global.deviceType == "MOBILE") {
             //TODO: Add Mobile functionality for _deactivate()
-            console.log("TODO: Add Mobile functionality for _deactivate()");
+            console.warn("TODO: Add Mobile functionality for _deactivate()");
         }
     }
 
@@ -538,12 +532,11 @@ class PasswordEntryPage {
             contentType: 'application/json',
             dataType: 'json',
             success: (response) => {
-                let jwt = response.data;
-                //TODO: Go to the Home Screen
-                console.log("TODO: Go to Home Screen");
+                global.jwt = response.data;
                 this._loginButton.visible = true;
                 this._backButton.visible = true;
                 global.pointerInteractableManager.addInteractables(this._interactables);
+                global.changeScene(SceneNames.HOME);
             },
             error: (xhr, status, error) => {
                 this._loginButton.visible = true;
