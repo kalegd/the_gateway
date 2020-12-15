@@ -11,6 +11,7 @@ import SessionHandler from '/library/scripts/core/handlers/SessionHandler.js';
 import global from '/library/scripts/core/resources/global.js';
 import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper.js';
 import * as THREE from '/library/scripts/three/build/three.module.js';
+import Stats from '/library/scripts/three/stats.module.js';
 
 export default class Main {
     constructor() {
@@ -30,6 +31,7 @@ export default class Main {
         this._createHandlers();
         this._createAssets();
         this._addEventListeners();
+        this._enableStats();
 
         this._renderer.setAnimationLoop(() => { this._loading() });
     }
@@ -111,10 +113,16 @@ export default class Main {
         
     }
 
-    _onResize () {
+    _onResize() {
         this._renderer.setSize(window.innerWidth, window.innerHeight);
         this._camera.aspect = window.innerWidth / window.innerHeight;
         this._camera.updateProjectionMatrix();
+    }
+
+    _enableStats() {
+        this._stats = new Stats();
+        this._stats.showPanel(0);
+        document.body.appendChild(this._stats.dom);
     }
 
     _loading() {
@@ -152,6 +160,7 @@ export default class Main {
     }
 
     _update() {
+        this._stats.begin();
         let timeDelta = this._clock.getDelta();
         if(global.deviceType == "XR") {
             global.physicsScene.simulate(timeDelta, true);
@@ -163,6 +172,7 @@ export default class Main {
         //    this._dynamicAssets[i].update(timeDelta);
         //}
         this._renderer.render(this._scene, this._camera);
+        this._stats.end();
     }
 
     changeScene(sceneName) {

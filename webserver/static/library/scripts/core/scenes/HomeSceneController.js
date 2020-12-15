@@ -2,6 +2,7 @@ import AmbientLight from '/library/scripts/core/assets/AmbientLight.js';
 import PointLight from '/library/scripts/core/assets/PointLight.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import TitleAndButtonPage from '/library/scripts/core/pages/TitleAndButtonPage.js';
+import MenuController from '/library/scripts/core/pages/home/MenuController.js';
 import global from '/library/scripts/core/resources/global.js';
 import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
 
@@ -12,6 +13,7 @@ import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper
 export default class HomeSceneController {
     constructor() {
         this._pivotPoint = new THREE.Object3D();
+        this._menuController = new MenuController();
 
         this._fetchUserInfo();
         this._createMeshes();
@@ -60,6 +62,7 @@ export default class HomeSceneController {
                 global.assets = response.data;
                 console.log(global.assets);
                 console.warn("TODO: Build scene from user assets information");
+                this._menuController.addToScene(this._pivotPoint);
             },
             error: (xhr, status, error) => {
                 if(!this._userAssetsErrorPage) {
