@@ -61,6 +61,17 @@
         <h1 id="user-name">...</h1>
         <div class="card height-400 width-400">
           <div class="padding-20">
+            <div id="sketchfab-div">
+              <p>
+                <label for="sketchfab-api-token">Sketchfab API Token: </label>
+                <input type="text" id="sketchfab-api-token">
+                <div>
+                  <input type="button" id="update-sketchfab-button" class="card-button" value="Update">
+                  <span id="sketchfab-update-success" class="hidden">&#9989;</span>
+                  <p id="sketchfab-update-error" class="error hidden">Sorry, looks like there was an error while trying to update your account &#129301;</p>
+                </div>
+              </p>
+            </div>
             <p><input type='radio' name='connection' value='local' checked> Accessing The Gateway from this Computer</p>
             <p><input type='radio' name='connection' value='network'> Accessing The Gateway from another Device</p>
             <div id="local-start-div">

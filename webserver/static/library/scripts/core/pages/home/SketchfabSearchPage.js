@@ -10,7 +10,7 @@ import {
     UI_BACKGROUND_OPACITY
 } from '/library/scripts/core/resources/constants.js';
 
-class LibrarySearchPage {
+class SketchfabSearchPage {
     constructor(controller) {
         this._controller = controller;
         this._interactables = [];
@@ -39,7 +39,7 @@ class LibrarySearchPage {
             'width': 0.3,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
-            'text': 'Library',
+            'text': 'Sketchfab',
             'fontSize': 0.1,
             'height': 0.2,
             'width': 0.5,
@@ -99,4 +99,4 @@ class LibrarySearchPage {
     }
 }
 
-export default LibrarySearchPage;
+export default SketchfabSearchPage;

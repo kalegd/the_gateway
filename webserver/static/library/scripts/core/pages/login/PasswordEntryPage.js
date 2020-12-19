@@ -7,7 +7,7 @@ import {
     UI_BACKGROUND_OPACITY
 } from '/library/scripts/core/resources/constants.js';
 import global from '/library/scripts/core/resources/global.js';
-import ValidKeys from '/library/scripts/core/resources/ValidKeys.js';
+import PasswordTextField from '/library/scripts/core/resources/PasswordTextField.js';
 
 import * as THREE from '/library/scripts/three/build/three.module.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
@@ -17,25 +17,8 @@ class PasswordEntryPage {
     constructor(backFunc) {
         this._interactables = [];
         this._password = "";
-        this._setupEventListeners();
         this._createPage();
         this._addPageContent(backFunc);
-    }
-
-    _setupEventListeners() {
-        this._keyListener = (event) => {
-            if(ValidKeys.has(event.key)) {
-                this._appendToPasswordContent(event.key);
-            } else if(event.key == "Backspace") {
-                this._removeFromEndOfPasswordContent();
-            } else if(event.key == "Enter") {
-                this._deactivate();
-                this._login();
-            }
-        };
-        this._clickListener = (event) => {
-            this._deactivate();
-        };
     }
 
     _createPage() {
@@ -62,14 +45,13 @@ class PasswordEntryPage {
     }
 
     _addPageContent(backFunc) {
-        this._passwordBlock = ThreeMeshUIHelper.createButtonBlock({
+        this._passwordField = new PasswordTextField({
             'text': "type password here...",
             'fontSize': 0.08,
             'height': 0.2,
             'width': 0.9,
+            'onEnter': () => { this._login(); },
         });
-        let passwordInteractable = new PointerInteractable(this._passwordBlock,
-            () => { this._activate(); });
         this._loginButton = ThreeMeshUIHelper.createButtonBlock({
             'text': "Login",
             'fontSize': 0.08,
@@ -97,85 +79,18 @@ class PasswordEntryPage {
             'margin': 0.04
         });
         this._wrongPasswordMessage.visible = false;
-        this._container.add(this._passwordBlock);
+        this._container.add(this._passwordField.block);
         this._container.add(this._wrongPasswordMessage);
         this._container.add(this._loginButton);
         this._container.add(this._backButton);
-        this._interactables.push(passwordInteractable);
+        this._interactables.push(this._passwordField.interactable);
         this._interactables.push(loginInteractable);
         this._interactables.push(backInteractable);
     }
 
-    _appendToPasswordContent(str) {
-        this._password += str;
-        this._updateDisplayedPasswordWithCursor();
-    }
-
-    _removeFromEndOfPasswordContent() {
-        if(this._password.length > 0) {
-            this._password = this._password.slice(0, -1);
-            this._updateDisplayedPasswordWithCursor();
-        }
-    }
-
-    _updateDisplayedPasswordWithCursor() {
-        let displayedPassword = "*".repeat(this._password.length) + "|";
-        let textComponent = this._passwordBlock.children[1];
-        textComponent.set({ content: displayedPassword });
-    }
-
-    _removeCursor() {
-        let textComponent = this._passwordBlock.children[1];
-        let content = textComponent.content;
-        if(content.length > 0 && content.endsWith("|")) {
-            let newContent = textComponent.content.slice(0,-1);
-            textComponent.set({ content: newContent });
-        }
-    }
-
-    _activate() {
-        let textComponent = this._passwordBlock.children[1];
-        if(textComponent.content.endsWith("|")) {
-            return;
-        } else if(textComponent.content == "type password here...") {
-            this._password = "";
-            textComponent.set({ content: "|" });
-        } else {
-            textComponent.set({ content: textComponent.content + "|" });
-        }
-        if(global.deviceType == "XR") {
-            //TODO: Add XR functionality for _activate()
-            console.warn("TODO: Add XR functionality for _activate()");
-        } else if(global.deviceType == "POINTER") {
-            document.addEventListener("keydown", this._keyListener);
-            document.addEventListener("click", this._clickListener);
-            global.keyboardLock = true;
-        } else if (global.deviceType == "MOBILE") {
-            //TODO: Add Mobile functionality for _activate()
-            console.warn("TODO: Add Mobile functionality for _activate()");
-        }
-    }
-
-    _deactivate() {
-        if(global.deviceType == "XR") {
-            //TODO: Add XR functionality for _deactivate()
-            console.warn("TODO: Add XR functionality for _deactivate()");
-        } else if(global.deviceType == "POINTER") {
-            document.removeEventListener("keydown", this._keyListener);
-            document.removeEventListener("click", this._clickListener);
-            global.keyboardLock = false;
-            this._removeCursor();
-        } else if (global.deviceType == "MOBILE") {
-            //TODO: Add Mobile functionality for _deactivate()
-            console.warn("TODO: Add Mobile functionality for _deactivate()");
-        }
-    }
-
     _reset() {
-        this._deactivate();
         this._wrongPasswordMessage.visible = false;
-        let textComponent = this._passwordBlock.children[1];
-        textComponent.set({ content: "type password here..." });
+        this._passwordField.reset();
     }
 
     _login() {
@@ -183,7 +98,7 @@ class PasswordEntryPage {
         this._loginButton.visible = false;
         this._backButton.visible = false;
         this._wrongPasswordMessage.visible = false;
-        let request = { 'id': this._account._id, 'password': this._password };
+        let request = { 'id': this._account._id, 'password': this._passwordField.content };
         $.ajax({
             url: global.API_URL + '/login',
             data: JSON.stringify(request),
@@ -191,7 +106,7 @@ class PasswordEntryPage {
             contentType: 'application/json',
             dataType: 'json',
             success: (response) => {
-                global.jwt = response.data;
+                global.jwt = response.data.jwt;
                 this._loginButton.visible = true;
                 this._backButton.visible = true;
                 global.pointerInteractableManager.addInteractables(this._interactables);

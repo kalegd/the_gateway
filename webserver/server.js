@@ -60,6 +60,7 @@ app.post('/user', async (req, res) => {
     if(body.isPasswordProtected) {
         body.password = shajs('sha256').update(body.password).digest('hex');
     }
+    body.sketchfabAPIToken = "";
     let record = await Database.createNew(req.body);
     //Update list of user ids
     let userIds = await Database.getOne("userIds");
@@ -70,7 +71,11 @@ app.post('/user', async (req, res) => {
         userIds.ids.push(record._id);
         await Database.updateOne("userIds", userIds);
     }
-    res.send({ data: record });
+    let jwtoken = jwt.sign({
+        purpose: "authentication",
+        userId: record._id
+    }, 'gateway');
+    res.send({ data: { user: record, jwt: jwtoken }});
 });
 
 app.delete('/user', async (req, res) => {
@@ -91,6 +96,29 @@ app.delete('/user', async (req, res) => {
         res.status(404);
         res.send();
     }
+});
+
+app.put('/user/sketchfab', async (req, res) => {
+    let authRecord = UserUtils.getAuthRecord(req);
+    if(!authRecord) {
+        res.status(401);
+        res.send({ "message": "Invalid Auth Token" });
+        return;
+    } else if(authRecord.userId != req.body.userId) {
+        res.status(403);
+        res.send({ "message": "You do not have permission for this action" });
+        return;
+    }
+    let userId = authRecord.userId;
+    let user = await Database.getOne(userId);
+    if(user == null) {
+        res.status(404);
+        res.send();
+        return;
+    }
+    user.sketchfabAPIToken = req.body.apiToken;
+    await Database.updateOne(userId, user);
+    res.send({});
 });
 
 app.get('/assets', async (req, res) => {
@@ -127,7 +155,7 @@ app.post('/login', async (req, res) => {
         purpose: "authentication",
         userId: user._id
     }, 'gateway');
-    res.send({ data: jwtoken });
+    res.send({ data: { jwt: jwtoken, user: user }});
 });
 
 app.get('/network-address', (req, res) => {

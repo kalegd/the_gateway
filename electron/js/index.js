@@ -13,6 +13,9 @@ $(".back-button").click(function() {
     $("#account-div").addClass("hidden");
     $("#create-account-div").addClass("hidden");
     $("#accounts-div").removeClass("hidden");
+
+    $("#sketchfab-update-error").addClass("hidden");
+    $("#sketchfab-update-success").addClass("hidden");
 });
 
 $("#password-protected").change(function() {
@@ -49,9 +52,11 @@ $("#create-account-submit").click(function() {
         dataType: 'json',
         success: function(response) {
             if(response.data) {
-                addAccountToPage(response.data);
-                activeUser = response.data;
-                $("#user-name").text(response.data.name);
+                addAccountToPage(response.data.user);
+                activeUser = response.data.user;
+                jwt = response.data.jwt;
+                $("#user-name").text(activeUser.name);
+                $("#sketchfab-api-token").val(activeUser.sketchfabAPIToken);
                 $("#create-account-div").addClass("hidden");
                 $("#account-div").removeClass("hidden");
             } else {
@@ -111,6 +116,28 @@ $("#start-button").click(function() {
     }
 });
 
+$("#update-sketchfab-button").click(function() {
+    $("#sketchfab-update-success").addClass("hidden");
+    $("#sketchfab-update-error").addClass("hidden");
+    let token = $("#sketchfab-api-token").val();
+    $.ajax({
+        url: API_URL + '/user/sketchfab',
+        data: JSON.stringify({ userId: activeUser._id, apiToken: token }),
+        type: 'PUT',
+        contentType: 'application/json',
+        dataType: 'json',
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("Authorization", jwt);
+        },
+        success: function(response) {
+            $("#sketchfab-update-success").removeClass("hidden");
+        },
+        error: function(xhr, status, error) {
+            $("#sketchfab-update-error").removeClass("hidden");
+        }
+    });
+});
+
 $("#delete-account-button").click(function() {
     $("#account-div").addClass("hidden");
     $("#confirm-delete-div").removeClass("hidden");
@@ -119,6 +146,8 @@ $("#delete-account-button").click(function() {
 $("#cancel-delete-account-button").click(function() {
     $("#confirm-delete-div").addClass("hidden");
     $("#account-div").removeClass("hidden");
+
+    $("#delete-error").addClass("hidden");
 });
 
 $("#confirm-delete-account-button").click(function() {
@@ -170,11 +199,13 @@ function login(id, password) {
         contentType: 'application/json',
         dataType: 'json',
         success: function(response) {
-            jwt = response.data;
+            jwt = response.data.jwt;
+            activeUser = response.data.user;
             $("#login-div").addClass("hidden");
             $("#accounts-div").addClass("hidden");
             $("#account-div").removeClass("hidden");
             $("#login-password").val("");
+            $("#sketchfab-api-token").val(activeUser.sketchfabAPIToken);
         },
         error: function(xhr, status, error) {
             $("#login-error").removeClass("hidden");

@@ -126,7 +126,7 @@ class AccountsMenuPage {
             contentType: 'application/json',
             dataType: 'json',
             success: (response) => {
-                global.jwt = response.data;
+                global.jwt = response.data.jwt;
                 this._waitingOnRequest = false;
                 this._container.visible = true;
                 global.changeScene(SceneNames.HOME);
