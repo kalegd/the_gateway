@@ -110,6 +110,66 @@ export default class ThreeMeshUIHelper {
         return buttonBlock;
     }
 
+    static createImageButtonBlock(params) {
+        let idleBackgroundColor = (params['idleBackgroundColor'])
+            ? params['idleBackgroundColor']
+            : new THREE.Color(0xffffff);
+        let hoveredBackgroundColor = (params['hoveredBackgroundColor'])
+            ? params['hoveredBackgroundColor']
+            : new THREE.Color(0x43464b);
+        let selectedBackgroundColor = (params['selectedBackgroundColor'])
+            ? params['selectedBackgroundColor']
+            : hoveredBackgroundColor;
+        let height = (params['height']) ? params['height'] : 0.15;
+        let width = (params['width']) ? params['width'] : 0.7;
+        let margin = (params['margin']) ? params['margin'] : 0.02;
+        let buttonBlock = new ThreeMeshUI.Block({
+            height: height,
+            width: width,
+            justifyContent: 'center',
+            alignContent: 'center',
+            margin: margin,
+            backgroundSize: "stretch",
+        });
+        buttonBlock.setupState({
+            state: States.IDLE,
+            attributes: {
+                offset: 0.02,
+                backgroundOpacity: 0.9,
+                backgroundColor: idleBackgroundColor,
+            },
+            //onSet: ()=> {
+            //    console.log("Button now idle!");
+            //}
+        });
+        buttonBlock.setupState({
+            state: States.HOVERED,
+            attributes: {
+                offset: 0.02,
+                backgroundOpacity: 0.9,
+                backgroundColor: hoveredBackgroundColor,
+            },
+            //onSet: ()=> {
+            //    console.log("Button now hovered over!");
+            //}
+        });
+        buttonBlock.setupState({
+            state: States.SELECTED,
+            attributes: {
+                offset: 0.01,
+                backgroundOpacity: 0.9,
+                backgroundColor: selectedBackgroundColor,
+            },
+            //onSet: ()=> {
+            //    console.log("Selected button!");
+            //}
+        });
+        buttonBlock.setState(States.IDLE);
+        buttonBlock.customField = "BUTTON";
+        buttonBlock.selectedOwners = new Set();
+        return buttonBlock;
+    }
+
     static createPointer() {
         let canvas = document.createElement( 'canvas' );
         canvas.width = 64;

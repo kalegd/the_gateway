@@ -1,8 +1,10 @@
 import AssetProviders from '/library/scripts/core/enums/AssetProviders.js';
+import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import global from '/library/scripts/core/resources/global.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
 import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper.js';
+import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
 import {
     FONT_FAMILY,
     FONT_TEXTURE,
@@ -12,9 +14,9 @@ import {
 let links = [{
         "userFriendlyName": "Sketchfab",
         "assetProvider": AssetProviders.SKETCHFAB
-    }, {
-        "userFriendlyName": "Google Poly",
-        "assetProvider": AssetProviders.GOOGLE_POLY
+    //}, {
+    //    "userFriendlyName": "Google Poly",
+    //    "assetProvider": AssetProviders.GOOGLE_POLY
     }];
 
 class LibraryPage {
@@ -92,7 +94,13 @@ class LibraryPage {
             });
             columnBlock.add(linkButton);
             let interactable = new PointerInteractable(linkButton, () => {
-                console.log("TODO: Go to " + links[i].assetProvider + " Asset Provider Page");
+                if(links[i].assetProvider == AssetProviders.SKETCHFAB) {
+                    if(global.user.sketchfabAPIToken) {
+                        this._controller.goToPage(HomeSceneMenus.SKETCHFAB_SEARCH);
+                    } else {
+                        this._controller.goToPage(HomeSceneMenus.SKETCHFAB_NEED_TOKEN);
+                    }
+                }
             });
             this._interactables.push(interactable);
         }
@@ -109,6 +117,7 @@ class LibraryPage {
     removeFromScene() {
         if(this._container.parent) {
             this._container.parent.remove(this._container);
+            fullDispose(this._container);
         }
         global.pointerInteractableManager.removeInteractables(this._interactables);
     }

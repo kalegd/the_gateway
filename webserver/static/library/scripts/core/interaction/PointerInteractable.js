@@ -70,6 +70,10 @@ class PointerInteractable {
         this._selectedOwners.clear();
         this.setState(States.IDLE);
     }
+
+    updateAction(newActionFunc) {
+        this._actionFunc = newActionFunc;
+    }
 }
 
 export default PointerInteractable;

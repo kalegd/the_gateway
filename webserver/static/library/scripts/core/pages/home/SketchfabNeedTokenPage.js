@@ -11,7 +11,7 @@ import {
     UI_BACKGROUND_OPACITY
 } from '/library/scripts/core/resources/constants.js';
 
-class LibrarySearchPage {
+class SketchfabSearchPage {
     constructor(controller) {
         this._controller = controller;
         this._interactables = [];
@@ -40,7 +40,7 @@ class LibrarySearchPage {
             'width': 0.3,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
-            'text': 'Library',
+            'text': 'Sketchfab',
             'fontSize': 0.1,
             'height': 0.2,
             'width': 0.5,
@@ -70,19 +70,14 @@ class LibrarySearchPage {
     }
 
     _addPageContent() {
-        let columnBlock = new ThreeMeshUI.Block({
-            'height': 0.8,
-            'width': 1.2,
-            'contentDirection': 'column',
-            'justifyContent': 'start',
-            'backgroundOpacity': 0,
+        let needTokenBlock = ThreeMeshUIHelper.createTextBlock({
+            'text': 'Please add your Sketchfab API Token first',
+            'fontSize': 0.08,
+            'height': 0.2,
+            'width': 1.4,
+            'margin': 0.05,
         });
-        console.log("TODO: Display Search Field and Button");
-        this._container.add(columnBlock);
-    }
-
-    setAssetType(assetType) {
-        this._assetType = assetType;
+        this._container.add(needTokenBlock);
     }
 
     addToScene(scene) {
@@ -101,4 +96,4 @@ class LibrarySearchPage {
     }
 }
 
-export default LibrarySearchPage;
+export default SketchfabSearchPage;

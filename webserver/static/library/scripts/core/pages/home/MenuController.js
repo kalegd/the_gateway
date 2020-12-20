@@ -8,6 +8,9 @@ import LibraryTagsPage from '/library/scripts/core/pages/home/LibraryTagsPage.js
 import LibrarySearchPage from '/library/scripts/core/pages/home/LibrarySearchPage.js';
 import ConnectedWebsitesPage from '/library/scripts/core/pages/home/ConnectedWebsitesPage.js';
 import DiscoverPage from '/library/scripts/core/pages/home/DiscoverPage.js';
+import SketchfabNeedTokenPage from '/library/scripts/core/pages/home/SketchfabNeedTokenPage.js';
+import SketchfabSearchPage from '/library/scripts/core/pages/home/SketchfabSearchPage.js';
+import SketchfabResultsPage from '/library/scripts/core/pages/home/SketchfabResultsPage.js';
 import SettingsPage from '/library/scripts/core/pages/home/SettingsPage.js';
 
 class MenuController {
@@ -22,6 +25,9 @@ class MenuController {
         this._pages[HomeSceneMenus.LIBRARY_SEARCH] = new LibrarySearchPage(this);
         this._pages[HomeSceneMenus.CONNECTED_WEBSITES] = new ConnectedWebsitesPage(this);
         this._pages[HomeSceneMenus.DISCOVER] = new DiscoverPage(this);
+        this._pages[HomeSceneMenus.SKETCHFAB_NEED_TOKEN] = new SketchfabNeedTokenPage(this);
+        this._pages[HomeSceneMenus.SKETCHFAB_SEARCH] = new SketchfabSearchPage(this);
+        this._pages[HomeSceneMenus.SKETCHFAB_RESULTS] = new SketchfabResultsPage(this);
         this._pages[HomeSceneMenus.SETTINGS] = new SettingsPage(this);
         this._pageCalls = [HomeSceneMenus.MAIN];
     }

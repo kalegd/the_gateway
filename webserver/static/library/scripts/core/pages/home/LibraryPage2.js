@@ -3,6 +3,7 @@ import PointerInteractable from '/library/scripts/core/interaction/PointerIntera
 import global from '/library/scripts/core/resources/global.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
 import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper.js';
+import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
 import {
     FONT_FAMILY,
     FONT_TEXTURE,
@@ -127,6 +128,7 @@ class LibraryPage2 {
     removeFromScene() {
         if(this._container.parent) {
             this._container.parent.remove(this._container);
+            fullDispose(this._container);
         }
         global.pointerInteractableManager.removeInteractables(this._interactables);
     }
