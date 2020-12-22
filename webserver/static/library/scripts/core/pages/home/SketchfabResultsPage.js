@@ -15,10 +15,13 @@ import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper
 
 class SketchfabResultsPage {
     constructor(controller) {
+        this._pivotPoint = new THREE.Object3D();
         this._controller = controller;
         this._interactables = [];
+        this._previewTextures = [];
         this._createPage();
         this._addPageContent();
+        this._createErrorBlock();
     }
 
     _createPage() {
@@ -69,6 +72,7 @@ class SketchfabResultsPage {
         });
         this._interactables.push(interactable);
         this._interactables.push(backInteractable);
+        this._pivotPoint.add(this._container);
     }
 
     _addPageContent() {
@@ -137,30 +141,54 @@ class SketchfabResultsPage {
         this._container.add(rowBlock);
     }
 
+    _createErrorBlock() {
+        this._errorMessage = ThreeMeshUIHelper.createTextBlock({
+            'text': 'Error searching Sketchfab, please try again later',
+            'fontColor': new THREE.Color(0x9c0006),
+            'backgroundColor': new THREE.Color(0xffc7ce),
+            'backgroundOpacity': 0.7,
+            'fontSize': 0.08,
+            'height': 0.2,
+            'width': 1.4,
+            'margin': 0
+        });
+        this._errorMessage.rotateY(Math.PI);
+        this._errorMessage.position.setY(0.85);
+        this._errorMessage.position.setZ(1.9);
+        this._errorMessage.set({ fontFamily: FONT_FAMILY, fontTexture: FONT_TEXTURE });
+        this._errorMessage.visible = false;
+        this._pivotPoint.add(this._errorMessage);
+    }
+
     loadInitialData(searchTerm, data) {
         this._results = data.results;
         this._cursor = 0;
         this._nextCursor = data.cursors.next;
         this._searchTerm = searchTerm;
-        this._previewTextures = [];
-        this._updatePreviews();
+        this._updateMenu();
     }
 
     _previousPage() {
+        if(this._errorMessage.parent) {
+            this._errorMessage.visible = false;
+        }
         if(this._cursor != 0) {
             global.pointerInteractableManager.removeInteractables(this._interactables);
             this._cursor -= this._previews.length;
-            this._updatePreviews();
+            this._updateMenu();
             global.pointerInteractableManager.addInteractables(this._interactables);
         }
     }
 
     _nextPage() {
+        if(this._errorMessage.parent) {
+            this._errorMessage.visible = false;
+        }
         if(this._nextCursor) {
             if(this._cursor + (2 * this._previews.length) <= this._nextCursor) {
                 global.pointerInteractableManager.removeInteractables(this._interactables);
                 this._cursor += this._previews.length;
-                this._updatePreviews();
+                this._updateMenu();
                 global.pointerInteractableManager.addInteractables(this._interactables);
             } else {
                 global.pointerInteractableManager.removeInteractables(this._interactables);
@@ -172,7 +200,7 @@ class SketchfabResultsPage {
         } else if(this._cursor + this._previews.length < this._results.length) {
             global.pointerInteractableManager.removeInteractables(this._interactables);
             this._cursor += this._previews.length;
-            this._updatePreviews();
+            this._updateMenu();
             global.pointerInteractableManager.addInteractables(this._interactables);
         }
     }
@@ -185,36 +213,19 @@ class SketchfabResultsPage {
                 this._results = this._results.concat(data.results);
                 this._cursor += this._previews.length;
                 this._nextCursor = data.cursors.next;
-                this._updatePreviews();
+                this._updateMenu();
                 global.pointerInteractableManager.addInteractables(this._interactables);
             },
             () => {
-                //TODO: display error message
-                this._updatePreviews();
+                this._errorMessage.visible = true;
+                this._updateMenu();
                 global.pointerInteractableManager.addInteractables(this._interactables);
             });
     }
 
-    _updatePreviews() {
-        this._interactables = this._interactables.slice(0,2);
-        for(let i = 0; i < this._previews.length; i++) {
-            if(i + this._cursor < this._results.length) {
-                this._previews[i].visible = true;
-                this._previews[i].set({ backgroundTexture: null });
-                this._previewInteractables[i].updateAction(() => {
-                    console.log("TODO: Go to Sketchfab Model Page for model " + i);
-                });
-                this._interactables.push(this._previewInteractables[i]);
-                let previewUrl = this._getPreviewUrl(this._results[this._cursor + i]);
-                new THREE.TextureLoader().load(previewUrl, (texture) => {
-                    this._previews[i].set({ backgroundTexture: texture });
-                    this._previewTextures.push(texture);
-                });
-            } else {
-                this._previews[i].visible = false;
-                this._previewInteractables[i].updateAction(null);
-            }
-        }
+    _updateMenu() {
+        this._updatePreviews();
+
         if(this._cursor != 0) {
             this._previousButton.visible = true;
             this._interactables.push(this._previousInteractable);
@@ -226,6 +237,35 @@ class SketchfabResultsPage {
             this._interactables.push(this._nextInteractable);
         } else {
             this._nextButton.visible = false;
+        }
+    }
+
+    _updatePreviews() {
+        this._interactables = this._interactables.slice(0,2);
+        for(let i = 0; i < this._previews.length; i++) {
+            let index = i + this._cursor;
+            if(index < this._results.length) {
+                this._previews[i].visible = true;
+                this._previews[i].set({ backgroundTexture: null });
+                this._previewInteractables[i].updateAction(() => {
+                    console.log("TODO: Go to Sketchfab Model Page for model " + i);
+                });
+                this._interactables.push(this._previewInteractables[i]);
+                let previewUrl = this._getPreviewUrl(this._results[index]);
+                if(index < this._previewTextures.length) {
+                    this._previews[i].set({
+                        backgroundTexture: this._previewTextures[index]
+                    });
+                } else {
+                    new THREE.TextureLoader().load(previewUrl, (texture) => {
+                        this._previews[i].set({ backgroundTexture: texture });
+                        this._previewTextures[i] = texture;
+                    });
+                }
+            } else {
+                this._previews[i].visible = false;
+                this._previewInteractables[i].updateAction(null);
+            }
         }
     }
 
@@ -249,20 +289,22 @@ class SketchfabResultsPage {
         for(let i = 0; i < this._previewTextures.length; i++) {
             this._previewTextures[i].dispose();
         }
+        this._previewTextures = [];
     }
 
     addToScene(scene) {
         if(scene) {
-            scene.add(this._container);
+            scene.add(this._pivotPoint);
             global.pointerInteractableManager.addInteractables(this._interactables);
         }
     }
 
     removeFromScene() {
-        if(this._container.parent) {
-            this._container.parent.remove(this._container);
+        if(this._pivotPoint.parent) {
+            this._pivotPoint.parent.remove(this._pivotPoint);
+            this._errorMessage.visible = false;
             this._cleanup();
-            fullDispose(this._container);
+            fullDispose(this._pivotPoint);
         }
         global.pointerInteractableManager.removeInteractables(this._interactables);
     }
