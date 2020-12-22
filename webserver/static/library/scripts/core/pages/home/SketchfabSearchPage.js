@@ -125,9 +125,9 @@ class SketchfabSearchPage {
     }
 
     _processSearchResponse(response) {
+        this._controller.goToPage(HomeSceneMenus.SKETCHFAB_RESULTS);
         let page = this._controller.getPage(HomeSceneMenus.SKETCHFAB_RESULTS);
         page.loadInitialData(this._searchField.content, response);
-        this._controller.goToPage(HomeSceneMenus.SKETCHFAB_RESULTS);
         this._searchButton.visible = true;
         this._backButton.visible = true;
     }

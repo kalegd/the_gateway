@@ -69,6 +69,7 @@ class SketchfabResultsPage {
         let interactable = new PointerInteractable(this._container.children[0]);
         let backInteractable = new PointerInteractable(backButton, () => {
             this._controller.back();
+            this._cleanup();
         });
         this._interactables.push(interactable);
         this._interactables.push(backInteractable);
@@ -165,7 +166,9 @@ class SketchfabResultsPage {
         this._cursor = 0;
         this._nextCursor = data.cursors.next;
         this._searchTerm = searchTerm;
+        global.pointerInteractableManager.removeInteractables(this._interactables);
         this._updateMenu();
+        global.pointerInteractableManager.addInteractables(this._interactables);
     }
 
     _previousPage() {
@@ -248,18 +251,20 @@ class SketchfabResultsPage {
                 this._previews[i].visible = true;
                 this._previews[i].set({ backgroundTexture: null });
                 this._previewInteractables[i].updateAction(() => {
-                    console.log("TODO: Go to Sketchfab Model Page for model " + i);
+                    this._goToPage(this._results[index]);
                 });
                 this._interactables.push(this._previewInteractables[i]);
-                let previewUrl = this._getPreviewUrl(this._results[index]);
                 if(index < this._previewTextures.length) {
                     this._previews[i].set({
                         backgroundTexture: this._previewTextures[index]
                     });
                 } else {
+                    let previewUrl = this._getPreviewUrl(this._results[index]);
                     new THREE.TextureLoader().load(previewUrl, (texture) => {
-                        this._previews[i].set({ backgroundTexture: texture });
-                        this._previewTextures[i] = texture;
+                        if(this._pivotPoint.parent) {
+                            this._previews[i].set({ backgroundTexture: texture });
+                            this._previewTextures[index] = texture;
+                        }
                     });
                 }
             } else {
@@ -282,12 +287,20 @@ class SketchfabResultsPage {
         return null;
     }
 
+    _goToPage(data) {
+        let page = this._controller.getPage(HomeSceneMenus.SKETCHFAB_MODEL);
+        page.loadModelInfo(data);
+        this._controller.goToPage(HomeSceneMenus.SKETCHFAB_MODEL);
+    }
+
     _cleanup() {
         for(let i = 0; i < this._previews.length; i++) {
             this._previews[i].set({ backgroundTexture: null });
         }
         for(let i = 0; i < this._previewTextures.length; i++) {
-            this._previewTextures[i].dispose();
+            if(this._previewTextures[i]) {
+                this._previewTextures[i].dispose();
+            }
         }
         this._previewTextures = [];
     }
@@ -303,7 +316,6 @@ class SketchfabResultsPage {
         if(this._pivotPoint.parent) {
             this._pivotPoint.parent.remove(this._pivotPoint);
             this._errorMessage.visible = false;
-            this._cleanup();
             fullDispose(this._pivotPoint);
         }
         global.pointerInteractableManager.removeInteractables(this._interactables);

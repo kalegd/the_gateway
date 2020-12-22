@@ -33,6 +33,22 @@ class SketchfabAPI {
             }
         });
     }
+
+    getDownloadInformation(uid, successCallback, errorCallback) {
+        $.ajax({
+            url: API_URL + '/models/' + uid + '/download',
+            type: 'GET',
+            contentType: 'application/json',
+            dataType: 'json',
+            headers: {'Authorization': 'Token '+global.user.sketchfabAPIToken},
+            success: (response) => {
+                successCallback(response);
+            },
+            error: (xhr, status, error) => {
+                errorCallback();
+            }
+        });
+    }
 }
 
 let sketchfabAPI = new SketchfabAPI();
