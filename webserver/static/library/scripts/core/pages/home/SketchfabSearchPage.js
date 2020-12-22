@@ -113,7 +113,6 @@ class SketchfabSearchPage {
     }
 
     _search() {
-        console.log("Your search keywords: " + this._searchField.content);
         global.pointerInteractableManager.removeInteractables(this._interactables);
         this._searchButton.visible = false;
         this._backButton.visible = false;
@@ -126,9 +125,8 @@ class SketchfabSearchPage {
     }
 
     _processSearchResponse(response) {
-        console.log(response);
         let page = this._controller.getPage(HomeSceneMenus.SKETCHFAB_RESULTS);
-        page.loadData(response);
+        page.loadInitialData(this._searchField.content, response);
         this._controller.goToPage(HomeSceneMenus.SKETCHFAB_RESULTS);
         this._searchButton.visible = true;
         this._backButton.visible = true;

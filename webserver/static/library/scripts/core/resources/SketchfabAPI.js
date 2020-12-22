@@ -18,6 +18,21 @@ class SketchfabAPI {
             }
         });
     }
+
+    searchFrom(query, fromIndex, successCallback, errorCallback) {
+        $.ajax({
+            url: API_URL + '/search?type=models&downloadable=true&q=' + encodeURI(query) + '&cursor=' + fromIndex,
+            type: 'GET',
+            contentType: 'application/json',
+            dataType: 'json',
+            success: (response) => {
+                successCallback(response);
+            },
+            error: (xhr, status, error) => {
+                errorCallback();
+            }
+        });
+    }
 }
 
 let sketchfabAPI = new SketchfabAPI();
