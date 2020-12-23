@@ -1,3 +1,5 @@
+import global from '/library/scripts/core/resources/global.js';
+
 const API_URL = 'https://api.sketchfab.com/v3';
 
 class SketchfabAPI {
@@ -34,15 +36,25 @@ class SketchfabAPI {
         });
     }
 
-    getDownloadInformation(uid, successCallback, errorCallback) {
+    download(uid, successCallback, errorCallback) {
+        let authHeader = {
+            'Authorization': 'Token ' + global.user.sketchfabAPIToken
+        };
         $.ajax({
             url: API_URL + '/models/' + uid + '/download',
             type: 'GET',
             contentType: 'application/json',
             dataType: 'json',
-            headers: {'Authorization': 'Token '+global.user.sketchfabAPIToken},
+            headers: authHeader,
             success: (response) => {
-                successCallback(response);
+                fetch(response.gltf.url).then((response) => {
+                    return response.arrayBuffer()
+                }).then((data) => {
+                    successCallback(data);
+                }).catch((error) => {
+                    console.error(error);
+                    errorCallback();
+                })
             },
             error: (xhr, status, error) => {
                 errorCallback();

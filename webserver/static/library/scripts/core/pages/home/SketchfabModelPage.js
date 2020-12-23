@@ -2,7 +2,7 @@ import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import global from '/library/scripts/core/resources/global.js';
 import SketchfabAPI from '/library/scripts/core/resources/SketchfabAPI.js';
-import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
+import { zipToGLTF, fullDispose } from '/library/scripts/core/resources/utils.module.js';
 import {
     FONT_FAMILY,
     FONT_TEXTURE,
@@ -136,20 +136,27 @@ class SketchfabResultsPage {
     }
 
     _preview() {
-        console.log("TODO: Preview model");
-        SketchfabAPI.getDownloadInformation(
+        window.open(this._modelInfo.viewerUrl, '_blank');
+    }
+
+    _download() {
+        console.log("TODO: Download object into library");
+        SketchfabAPI.download(
             this._modelInfo.uid,
             (data) => {
-                console.log(data);
+                //TODO: Save file instead of adding it to the scene. Also take user to the Library Model page for this asset. Will need to remove the import for zipToGLTF when I do that change
+                zipToGLTF(data, (gltf) => {
+                    this._pivotPoint.add(gltf.scene);
+                }, () => {
+                    console.log("TODO: Display error aout getting model information");
+                });
             },
             () => {
                 console.log("TODO: Display error about getting model information");
             });
     }
 
-    _download() {
-        console.log("TODO: Download object into library");
-    }
+
 
     loadModelInfo(data) {
         console.log(data);

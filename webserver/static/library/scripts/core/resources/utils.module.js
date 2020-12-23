@@ -1,5 +1,8 @@
 import global from '/library/scripts/core/resources/global.js';
 import * as THREE from '/library/scripts/three/build/three.module.js';
+import { DRACOLoader } from '/library/scripts/three/examples/jsm/loaders/DRACOLoader.js';
+import { GLTFLoader } from '/library/scripts/three/examples/jsm/loaders/GLTFLoader.js';
+import { JSZip } from '/library/scripts/three/examples/jsm/libs/jszip.module.min.js';
 
 var id = 0;
 
@@ -49,44 +52,33 @@ export const createLoadingLock = () => {
     return uuid;
 };
 
-export const loadScripts = (array,callback) => {
-    var loader = function(src,handler){
-        var script = document.createElement("script");
-        script.src = src;
-        script.onload = script.onreadystatechange = function(){
-            script.onreadystatechange = script.onload = null;
-            handler();
+export const zipToGLTF = (arrayBuffer, successCallback, errorCallback) => {
+    let zip = JSZip(arrayBuffer);
+    console.log(zip);
+    zip.filter(( path, file ) => {
+        let manager = new THREE.LoadingManager();
+        manager.setURLModifier((url) => {
+            let file = zip.files[url];
+            if(file) {
+                console.log('Loading', url);
+                var blob = new Blob([file.asArrayBuffer()], { type: 'application/octet-stream' });
+                return URL.createObjectURL(blob);
+            }
+            return url;
+        });
+        let extension = file.name.split('.').pop().toLowerCase();
+        switch ( extension ) {
+            case 'gltf':
+                var dracoLoader = new DRACOLoader();
+                dracoLoader.setDecoderPath('../examples/js/libs/draco/gltf/');
+                var loader = new GLTFLoader(manager);
+                loader.setDRACOLoader(dracoLoader);
+                loader.parse(file.asText(), '',
+                    (result) => { successCallback(result); },
+                    () => { errorCallback(); });
+                break;
         }
-        var head = document.getElementsByTagName("head")[0];
-        (head || document.body).appendChild( script );
-    };
-    (function run(){
-        if(array.length!=0){
-            loader(array.shift(), run);
-        }else{
-            callback && callback();
-        }
-    })();
-};
-
-export const insertWrappedTextToCanvas = (context, text, x, y, maxWidth, lineHeight) => {
-    var words = text.split(' ');
-    var line = '';
-
-    for(var n = 0; n < words.length; n++) {
-        var testLine = line + words[n] + ' ';
-        var metrics = context.measureText(testLine);
-        var testWidth = metrics.width;
-        if (testWidth > maxWidth && n > 0) {
-            context.fillText(line, x, y);
-            line = words[n] + ' ';
-            y += lineHeight;
-        }
-        else {
-            line = testLine;
-        }
-    }
-    context.fillText(line, x, y);
+    });
 };
 
 export const fullDispose = (object3d) => {
