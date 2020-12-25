@@ -140,20 +140,26 @@ class SketchfabResultsPage {
     }
 
     _download() {
-        console.log("TODO: Download object into library");
-        SketchfabAPI.download(
-            this._modelInfo.uid,
-            (data) => {
-                //TODO: Save file instead of adding it to the scene. Also take user to the Library Model page for this asset. Will need to remove the import for zipToGLTF when I do that change
-                zipToGLTF(data, (gltf) => {
-                    this._pivotPoint.add(gltf.scene);
-                }, () => {
-                    console.log("TODO: Display error aout getting model information");
-                });
+        let request = { 'userId': global.user._id, 'sketchfabUid': this._modelInfo.uid };
+        $.ajax({
+            url: global.API_URL + '/user/sketchfab/model',
+            type: 'POST',
+            data: JSON.stringify(request),
+            contentType: 'application/json',
+            dataType: 'json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", global.jwt);
             },
-            () => {
-                console.log("TODO: Display error about getting model information");
-            });
+            success: (response) => {
+                //TODO: Update asset information for both general asset and user library asset
+                //Take user to Library Model Page
+                console.log(response);
+            },
+            error: (xhr, status, error) => {
+                //TODO: Display error about getting model information
+                console.log(error);
+            }
+        });
     }
 
 
