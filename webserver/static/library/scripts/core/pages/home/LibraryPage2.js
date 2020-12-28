@@ -12,7 +12,7 @@ import {
 } from '/library/scripts/core/resources/constants.js';
 let links = [{
         "userFriendlyName": "Browse All",
-        "pageId": HomeSceneMenus.LIBRARY_LIST
+        "pageId": HomeSceneMenus.LIBRARY_RESULTS
     }, {
         "userFriendlyName": "Tags",
         "pageId": HomeSceneMenus.LIBRARY_TAGS
@@ -98,9 +98,9 @@ class LibraryPage2 {
             let interactable = new PointerInteractable(linkButton, () => {
                 console.log("TODO: Go to " + links[i].pageId + " for " + this._assetType);
                 let page = this._controller.getPage(links[i].pageId);
-                if(links[i].pageId == HomeSceneMenus.LIBRARY_LIST) {
+                if(links[i].pageId == HomeSceneMenus.LIBRARY_RESULTS) {
                     console.log("TODO: set asset list appropriately");
-                    page.setAssetList([]);
+                    page.loadData(global.user.library.assets);
                 } else if(links[i].pageId == HomeSceneMenus.LIBRARY_TAGS) {
                     console.log("TODO: set tag list appropriately");
                     page.setTagList([]);

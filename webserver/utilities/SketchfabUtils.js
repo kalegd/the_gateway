@@ -3,7 +3,8 @@ const FileType = require('file-type');
 const fs = require('fs');
 
 const API_URL = 'https://api.sketchfab.com/v3';
-const assetsPath = 'webserver/static/library/assets/';
+const assetsWritePath = 'webserver/static/library/assets/';
+const assetsReadPath = 'library/assets/';
 
 class SketchfabUtils {
     async downloadAndSave(uid, sketchfabAPIToken, successCallback, errorCallback) {
@@ -13,7 +14,7 @@ class SketchfabUtils {
             let model = await this._fetchModel(downloadLink);
             let smallPreviewImage = await this._fetchSmallPreviewImage(modelInfo);
             let mediumPreviewImage = await this._fetchMediumPreviewImage(modelInfo);
-            let filenames = this._saveAssets(uid, model, smallPreviewImage, mediumPreviewImage);
+            let filenames = await this._saveAssets(uid, model, smallPreviewImage, mediumPreviewImage);
             successCallback(modelInfo, filenames);
         } catch(err) {
             //TODO: Figure out if rate limit and send that information in the errorCallback if so
@@ -79,13 +80,17 @@ class SketchfabUtils {
         this._saveAsset(modelFilename, model);
         this._saveAsset(smallImageFilename, smallPreviewImage);
         this._saveAsset(mediumImageFilename, mediumPreviewImage);
-        return [modelFilename, smallImageFilename, mediumImageFilename];
+        return [
+            assetsReadPath + modelFilename,
+            assetsReadPath + smallImageFilename,
+            assetsReadPath + mediumImageFilename
+        ];
         
     }
 
     _saveAsset(filename, arrayBuffer) {
         let buffer = Buffer.from(arrayBuffer);
-        fs.createWriteStream(assetsPath + filename).write(buffer);
+        fs.createWriteStream(assetsWritePath + filename).write(buffer);
     }
 
 }

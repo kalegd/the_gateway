@@ -21,8 +21,8 @@ let links = [{
         "userFriendlyName": "Discover New Assets",
         "pageId": HomeSceneMenus.DISCOVER
     }, {
-        "userFriendlyName": "Connected Websites",
-        "pageId": HomeSceneMenus.CONNECTED_WEBSITES
+        "userFriendlyName": "Webworlds",
+        "pageId": HomeSceneMenus.WEBWORLDS
     }, {
         "userFriendlyName": "Settings",
         "pageId": HomeSceneMenus.SETTINGS

@@ -63,7 +63,7 @@ app.post('/user', async (req, res) => {
     }
     body.sketchfabAPIToken = "";
     body.library = { "assets": [] };
-    body.scene = { "assets": [] };
+    body.scenes = [{ "assets": [], "name": "Default" }];
     let record = await Database.createNew(req.body);
     //Update list of user ids
     let userIds = await Database.getOne("userIds");
@@ -211,7 +211,8 @@ app.get('/assets', async (req, res) => {
         res.send();
         return;
     }
-    let assets = await Database.getAll(user.assetIds);
+    let assetIds = user.library.assets.map(asset => asset.assetId);
+    let assets = await Database.getAll(assetIds);
     assets.forEach((asset) => { asset['owners'] = null; });
     res.send({ data: assets });
 });

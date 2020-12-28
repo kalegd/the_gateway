@@ -1,7 +1,6 @@
 import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import global from '/library/scripts/core/resources/global.js';
-import SketchfabAPI from '/library/scripts/core/resources/SketchfabAPI.js';
 import { zipToGLTF, fullDispose } from '/library/scripts/core/resources/utils.module.js';
 import {
     FONT_FAMILY,
@@ -13,7 +12,7 @@ import * as THREE from '/library/scripts/three/build/three.module.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
 import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper.js';
 
-class SketchfabModelPage {
+class LibraryModelPage {
     constructor(controller) {
         this._pivotPoint = new THREE.Object3D();
         this._controller = controller;
@@ -44,7 +43,7 @@ class SketchfabModelPage {
             'width': 0.3,
         });
         this._titleBlock = ThreeMeshUIHelper.createTextBlock({
-            'text': 'Sketchfab',
+            'text': 'Library',
             'fontSize': 0.1,
             'height': 0.2,
             'width': 0.5,
@@ -67,7 +66,6 @@ class SketchfabModelPage {
 
         let interactable = new PointerInteractable(this._container.children[0]);
         let backInteractable = new PointerInteractable(backButton, () => {
-            this._reset();
             this._controller.back();
         });
         this._interactables.push(interactable);
@@ -91,29 +89,18 @@ class SketchfabModelPage {
             'backgroundOpacity': 0.5,
             'margin': 0.02,
         });
-        this._previewButton = ThreeMeshUIHelper.createButtonBlock({
-            'text': "Preview",
+        this._addToSceneButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': "Add To Scene",
             'fontSize': 0.08,
             'height': 0.1,
-            'width': 0.5,
+            'width': 0.55,
         });
-        let previewInteractable = new PointerInteractable(
-            this._previewButton,
-            () => { this._preview(); });
-        this._downloadButton = ThreeMeshUIHelper.createButtonBlock({
-            'text': "Download",
-            'fontSize': 0.08,
-            'height': 0.1,
-            'width': 0.5,
-        });
-        this._downloadInteractable = new PointerInteractable(
-            this._downloadButton,
-            () => { this._download(); });
-        this._interactables.push(previewInteractable);
-        this._interactables.push(this._downloadInteractable);
+        let addToSceneInteractable = new PointerInteractable(
+            this._addToSceneButton,
+            () => { this._addToScene(); });
+        this._interactables.push(addToSceneInteractable);
         columnBlock.add(this._imageBlock);
-        columnBlock.add(this._previewButton);
-        columnBlock.add(this._downloadButton);
+        columnBlock.add(this._addToSceneButton);
         this._container.add(columnBlock);
     }
 
@@ -136,44 +123,8 @@ class SketchfabModelPage {
         this._pivotPoint.add(this._errorMessage);
     }
 
-    _reset() {
-        this._errorMessage.visible = false;
-        this._downloadButton.visible = true;
-    }
-
-    _preview() {
-        window.open(this._modelInfo.viewerUrl, '_blank');
-    }
-
-    _download() {
-        global.pointerInteractableManager.removeInteractables([this._downloadInteractable]);
-        this._downloadButton.visible = false;
-        this._errorMessage.visible = false;
-        let request = { 'userId': global.user._id, 'sketchfabUid': this._modelInfo.uid };
-        $.ajax({
-            url: global.API_URL + '/user/sketchfab/model',
-            type: 'POST',
-            data: JSON.stringify(request),
-            contentType: 'application/json',
-            dataType: 'json',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", global.jwt);
-            },
-            success: (response) => {
-                //TODO: Update asset information for both general asset and user
-                //      library asset. If we're still on this page, then take
-                //      user to Library Model Page
-                console.log(response);
-            },
-            error: (xhr, status, error) => {
-                if(this._pivotPoint.parent) {
-                    this._downloadButton.visible = true;
-                    this._errorMessage.visible = true;
-                    global.pointerInteractableManager.addInteractables([
-                        this._downloadInteractable]);
-                }
-            }
-        });
+    _addToScene() {
+        console.log("TODO: add model to scene");
     }
 
 
@@ -192,16 +143,9 @@ class SketchfabModelPage {
     }
 
     _getPreviewUrl(data) {
-        let images = data.thumbnails.images;
-        for(let i = 0; i < images.length; i++) {
-            if(images[i].height <= 576 && images[i].width <= 1024) {
-                return images[i].url;
-            }
-        }
-        if(images.length > 0) {
-            return images[images.length-1].url;
-        }
-        return null;
+        //TODO: Add logic to determine if data is a model, material, or image
+        let previewUrl = global.assetsMap[data.assetId].mediumPreviewImage;
+        return previewUrl;
     }
 
     _cleanup() {
@@ -230,4 +174,4 @@ class SketchfabModelPage {
     }
 }
 
-export default SketchfabModelPage;
+export default LibraryModelPage;

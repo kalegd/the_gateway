@@ -2,7 +2,6 @@ import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import global from '/library/scripts/core/resources/global.js';
 import TextField from '/library/scripts/core/resources/TextField.js';
-import SketchfabAPI from '/library/scripts/core/resources/SketchfabAPI.js';
 import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
 import {
     FONT_FAMILY,
@@ -14,7 +13,7 @@ import * as THREE from '/library/scripts/three/build/three.module.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
 import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper.js';
 
-class SketchfabSearchPage {
+class NewWebworldPage {
     constructor(controller) {
         this._controller = controller;
         this._interactables = [];
@@ -43,7 +42,7 @@ class SketchfabSearchPage {
             'width': 0.3,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
-            'text': 'Sketchfab',
+            'text': 'Webworlds',
             'fontSize': 0.1,
             'height': 0.2,
             'width': 0.5,
@@ -74,23 +73,23 @@ class SketchfabSearchPage {
     }
 
     _addPageContent() {
-        this._searchField = new TextField({
-            'text': "type search keywords here...",
+        this._nameField = new TextField({
+            'text': "type webworld name here...",
             'fontSize': 0.08,
             'height': 0.2,
             'width': 0.9,
-            'onEnter': () => { this._search(); },
+            'onEnter': () => { this._create(); },
         });
-        this._searchButton = ThreeMeshUIHelper.createButtonBlock({
-            'text': "Search",
+        this._createButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': "Create",
             'fontSize': 0.08,
             'height': 0.1,
             'width': 0.4,
         });
-        let searchInteractable = new PointerInteractable(this._searchButton,
-            () => { this._search(); });
+        let createInteractable = new PointerInteractable(this._createButton,
+            () => { this._create(); });
         this._errorMessage = ThreeMeshUIHelper.createTextBlock({
-            'text': 'Error searching Sketchfab, please try again later',
+            'text': 'Error creating new webworld, please try again later',
             'fontColor': new THREE.Color(0x9c0006),
             'backgroundColor': new THREE.Color(0xffc7ce),
             'backgroundOpacity': 0.7,
@@ -100,44 +99,63 @@ class SketchfabSearchPage {
             'margin': 0.04
         });
         this._errorMessage.visible = false;
-        this._container.add(this._searchField.block);
-        this._container.add(this._searchButton);
+        this._container.add(this._nameField.block);
+        this._container.add(this._createButton);
         this._container.add(this._errorMessage);
-        this._interactables.push(this._searchField.interactable);
-        this._interactables.push(searchInteractable);
+        this._interactables.push(this._nameField.interactable);
+        this._interactables.push(createInteractable);
     }
 
     _reset() {
-        this._searchField.reset();
+        this._nameField.reset();
         this._errorMessage.visible = false;
     }
 
-    _search() {
-        //TODO: Make this non-blocking. Allow user to go back and add
-        //      if(this._pivotPoint.parent) check when re-enabling buttons.
-        //      Additionally add reset function for when back is pressed. Follow
-        //      the example in the SketchfabModelPage to help
+    _create() {
+        //I'm okay with this action being a blocking action
         global.pointerInteractableManager.removeInteractables(this._interactables);
-        this._searchButton.visible = false;
-        this._backButton.visible = false;
         this._errorMessage.visible = false;
-        SketchfabAPI.search(
-            this._searchField.content,
-            (response) => { this._processSearchResponse(response); },
-            () => { this._processErrorResponse(); }
-        );
+        this._createButton.visible = false;
+        this._backButton.visible = false;
+        let request = {
+            'userId': global.user._id,
+            'name': this._nameField.content
+        };
+        $.ajax({
+            url: global.API_URL + '/user/scene',
+            type: 'POST',
+            data: JSON.stringify(request),
+            contentType: 'application/json',
+            dataType: 'json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", global.jwt);
+            },
+            success: (response) => {
+                console.log(response);
+                this._reset();
+                //TODO: Go back a page and then to the newly created webworld
+                //      using the id in the response to load the data. Also add
+                //      the new webworld to global.user.scenes
+            },
+            error: (xhr, status, error) => {
+                this._errorMessage.visible = true;
+                this._createButton.visible = true;
+                this._backButton.visible = true;
+                global.pointerInteractableManager.addInteractables(this._interactables);
+            }
+        });
     }
 
     _processSearchResponse(response) {
         this._controller.goToPage(HomeSceneMenus.SKETCHFAB_RESULTS);
         let page = this._controller.getPage(HomeSceneMenus.SKETCHFAB_RESULTS);
-        page.loadInitialData(this._searchField.content, response);
-        this._searchButton.visible = true;
+        page.loadInitialData(this._nameField.content, response);
+        this._createButton.visible = true;
         this._backButton.visible = true;
     }
 
     _processErrorResponse() {
-        this._searchButton.visible = true;
+        this._createButton.visible = true;
         this._backButton.visible = true;
         this._errorMessage.visible = true;
         global.pointerInteractableManager.addInteractables(this._interactables);
@@ -159,4 +177,4 @@ class SketchfabSearchPage {
     }
 }
 
-export default SketchfabSearchPage;
+export default NewWebworldPage;

@@ -60,7 +60,12 @@ export default class HomeSceneController {
             },
             success: (response) => {
                 global.assets = response.data;
+                global.assetsMap = response.data.reduce(function(map, asset) {
+                    map[asset._id] = asset;
+                    return map;
+                }, {});
                 console.log(global.assets);
+                console.log(global.assetsMap);
                 console.warn("TODO: Build scene from user assets information");
                 this._menuController.addToScene(this._pivotPoint);
             },
