@@ -104,7 +104,11 @@ class WebworldsPage {
             this._webworldButtons.push(webworldButton);
             columnBlock.add(webworldButton);
             let interactable = new PointerInteractable(webworldButton, () => {
-                //TODO: go to webworld for this._cursor + i
+                let sceneIndex = this._cursor + i;
+                let scene = global.scenesMap[global.user.scenes[sceneIndex]];
+                let page = this._controller.getPage(HomeSceneMenus.WEBWORLD);
+                page.loadData(scene);
+                this._controller.goToPage(HomeSceneMenus.WEBWORLD);
             });
             this._interactables.push(interactable);
             this._webworldInteractables.push(interactable);
@@ -155,8 +159,9 @@ class WebworldsPage {
             let webworldButton = this._webworldButtons[i];
             if(this._cursor + i < global.user.scenes.length) {
                 let sceneIndex = this._cursor + i;
+                let scene = global.scenesMap[global.user.scenes[sceneIndex]];
                 webworldButton.children[1].set({
-                    content: global.user.scenes[sceneIndex].name
+                    content: scene.name
                 });
                 webworldButton.visible = true;
                 this._interactables.push(this._webworldInteractables[i]);

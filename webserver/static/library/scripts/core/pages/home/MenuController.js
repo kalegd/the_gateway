@@ -7,6 +7,7 @@ import LibraryResultsPage from '/library/scripts/core/pages/home/LibraryResultsP
 import LibraryTagsPage from '/library/scripts/core/pages/home/LibraryTagsPage.js';
 import LibrarySearchPage from '/library/scripts/core/pages/home/LibrarySearchPage.js';
 import LibraryModelPage from '/library/scripts/core/pages/home/LibraryModelPage.js';
+import WebworldPage from '/library/scripts/core/pages/home/WebworldPage.js';
 import WebworldsPage from '/library/scripts/core/pages/home/WebworldsPage.js';
 import NewWebworldPage from '/library/scripts/core/pages/home/NewWebworldPage.js';
 import DiscoverPage from '/library/scripts/core/pages/home/DiscoverPage.js';
@@ -27,6 +28,7 @@ class MenuController {
         this._pages[HomeSceneMenus.LIBRARY_TAGS] = new LibraryTagsPage(this);
         this._pages[HomeSceneMenus.LIBRARY_SEARCH] = new LibrarySearchPage(this);
         this._pages[HomeSceneMenus.LIBRARY_MODEL] = new LibraryModelPage(this);
+        this._pages[HomeSceneMenus.WEBWORLD] = new WebworldPage(this);
         this._pages[HomeSceneMenus.WEBWORLDS] = new WebworldsPage(this);
         this._pages[HomeSceneMenus.NEW_WEBWORLD] = new NewWebworldPage(this);
         this._pages[HomeSceneMenus.DISCOVER] = new DiscoverPage(this);

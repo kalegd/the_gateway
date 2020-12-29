@@ -21,7 +21,7 @@ export default class HomeSceneController {
 
     _fetchUserInfo() {
         $.ajax({
-            url: '/user',
+            url: '/user/info',
             type: 'GET',
             contentType: 'application/json',
             dataType: 'json',
@@ -29,9 +29,23 @@ export default class HomeSceneController {
                 xhr.setRequestHeader("Authorization", global.jwt);
             },
             success: (response) => {
-                global.user = response.data;
-                console.log(global.user);
-                this._fetchUserAssets();
+                global.user = response.data.user;
+                global.assets = response.data.assets;
+                global.assetsMap = response.data.assets.reduce(
+                    function(map, asset) {
+                        map[asset._id] = asset;
+                        return map;
+                    }, {});
+                global.scenesMap = response.data.scenes.reduce(
+                    function(map, scene) {
+                        map[scene._id] = scene;
+                        return map;
+                    }, {});;
+                //console.log(global.user);
+                //console.log(global.assets);
+                //console.log(global.assetsMap);
+                console.warn("TODO: Build scene from user assets information");
+                this._menuController.addToScene(this._pivotPoint);
             },
             error: (xhr, status, error) => {
                 if(!this._userInfoErrorPage) {
@@ -45,42 +59,6 @@ export default class HomeSceneController {
                     });
                 }
                 this._userInfoErrorPage.addToScene(this._pivotPoint);
-            }
-        });
-    }
-
-    _fetchUserAssets() {
-        $.ajax({
-            url: '/assets',
-            type: 'GET',
-            contentType: 'application/json',
-            dataType: 'json',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", global.jwt);
-            },
-            success: (response) => {
-                global.assets = response.data;
-                global.assetsMap = response.data.reduce(function(map, asset) {
-                    map[asset._id] = asset;
-                    return map;
-                }, {});
-                console.log(global.assets);
-                console.log(global.assetsMap);
-                console.warn("TODO: Build scene from user assets information");
-                this._menuController.addToScene(this._pivotPoint);
-            },
-            error: (xhr, status, error) => {
-                if(!this._userAssetsErrorPage) {
-                    this._userAssetsErrorPage = new TitleAndButtonPage({
-                        'Title': 'Error connecting to your Gateway Server',
-                        'Button Text': 'Try Again',
-                        'Button Function': () => {
-                            this._userAssetsErrorPage.removeFromScene();
-                            this._fetchUserAssets();
-                        },
-                    });
-                }
-                this._userAssetsErrorPage.addToScene(this._pivotPoint);
             }
         });
     }

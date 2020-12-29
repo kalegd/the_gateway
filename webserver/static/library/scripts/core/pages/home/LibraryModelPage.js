@@ -89,18 +89,18 @@ class LibraryModelPage {
             'backgroundOpacity': 0.5,
             'margin': 0.02,
         });
-        this._addToSceneButton = ThreeMeshUIHelper.createButtonBlock({
+        this._addToWebworldButton = ThreeMeshUIHelper.createButtonBlock({
             'text': "Add To Scene",
             'fontSize': 0.08,
             'height': 0.1,
             'width': 0.55,
         });
-        let addToSceneInteractable = new PointerInteractable(
-            this._addToSceneButton,
-            () => { this._addToScene(); });
-        this._interactables.push(addToSceneInteractable);
+        let addToWebworldInteractable = new PointerInteractable(
+            this._addToWebworldButton,
+            () => { this._addToWebworld(); });
+        this._interactables.push(addToWebworldInteractable);
         columnBlock.add(this._imageBlock);
-        columnBlock.add(this._addToSceneButton);
+        columnBlock.add(this._addToWebworldButton);
         this._container.add(columnBlock);
     }
 
@@ -123,8 +123,8 @@ class LibraryModelPage {
         this._pivotPoint.add(this._errorMessage);
     }
 
-    _addToScene() {
-        console.log("TODO: add model to scene");
+    _addToWebworld() {
+        console.log("TODO: add model to webworld + scene");
     }
 
 

@@ -6,6 +6,7 @@ const internalIp = require('internal-ip');
 const jwt = require('jsonwebtoken');
 const shajs = require('sha.js');
 //const cors = require('cors');
+
 const app = express();
 const port = 3100;
 
@@ -57,13 +58,14 @@ app.get('/user', async (req, res) => {
 });
 
 app.post('/user', async (req, res) => {
+    let scene = await Database.createNew({ "assets": [], "name": "Default" });
     let body = req.body;
     if(body.isPasswordProtected) {
         body.password = shajs('sha256').update(body.password).digest('hex');
     }
     body.sketchfabAPIToken = "";
     body.library = { "assets": [] };
-    body.scenes = [{ "assets": [], "name": "Default" }];
+    body.scenes = [scene._id];
     let record = await Database.createNew(req.body);
     //Update list of user ids
     let userIds = await Database.getOne("userIds");
@@ -99,6 +101,55 @@ app.delete('/user', async (req, res) => {
         res.status(404);
         res.send();
     }
+});
+
+app.get('/user/info', async (req, res) => {
+    let authRecord = UserUtils.getAuthRecord(req);
+    if(!authRecord) {
+        res.status(401);
+        res.send({ "message": "Invalid Auth Token" });
+        return;
+    }
+    let userId = authRecord.userId;
+    let user = await Database.getOne(userId);
+    if(!user) {
+        res.status(404);
+        res.send();
+        return;
+    }
+    let sceneIds = user.scenes;
+    let scenes = await Database.getAll(sceneIds);
+    let assetIds = user.library.assets.map(asset => asset.assetId);
+    let assets = await Database.getAll(assetIds);
+    assets.forEach((asset) => { asset['owners'] = null; });
+    res.send({ data: { user: user, assets: assets, scenes: scenes } });
+});
+
+app.post('/user/scene', async (req, res) => {
+    let authRecord = UserUtils.getAuthRecord(req);
+    if(!authRecord) {
+        res.status(401);
+        res.send({ "message": "Invalid Auth Token" });
+        return;
+    } else if(authRecord.userId != req.body.userId) {
+        res.status(403);
+        res.send({ "message": "You do not have permission for this action" });
+        return;
+    } else if(!req.body.name) {
+        res.status(422);
+        res.send({ "message": "Missing parameter 'name'" });
+    }
+    let userId = authRecord.userId;
+    let user = await Database.getOne(userId);
+    if(user == null) {
+        res.status(404);
+        res.send();
+        return;
+    }
+    let scene = await Database.createNew({"assets": [], "name": req.body.name});
+    user.scenes.push(scene._id);
+    await Database.updateOne(userId, user);
+    res.send({ data: scene });
 });
 
 app.put('/user/sketchfab', async (req, res) => {
@@ -197,25 +248,25 @@ app.post('/user/sketchfab/model', async (req, res) => {
         });
 });
 
-app.get('/assets', async (req, res) => {
-    let authRecord = UserUtils.getAuthRecord(req);
-    if(!authRecord) {
-        res.status(401);
-        res.send({ "message": "Invalid Auth Token" });
-        return;
-    }
-    let userId = authRecord.userId;
-    let user = await Database.getOne(userId);
-    if(!user) {
-        res.status(404);
-        res.send();
-        return;
-    }
-    let assetIds = user.library.assets.map(asset => asset.assetId);
-    let assets = await Database.getAll(assetIds);
-    assets.forEach((asset) => { asset['owners'] = null; });
-    res.send({ data: assets });
-});
+//app.get('/assets', async (req, res) => {
+//    let authRecord = UserUtils.getAuthRecord(req);
+//    if(!authRecord) {
+//        res.status(401);
+//        res.send({ "message": "Invalid Auth Token" });
+//        return;
+//    }
+//    let userId = authRecord.userId;
+//    let user = await Database.getOne(userId);
+//    if(!user) {
+//        res.status(404);
+//        res.send();
+//        return;
+//    }
+//    let assetIds = user.library.assets.map(asset => asset.assetId);
+//    let assets = await Database.getAll(assetIds);
+//    assets.forEach((asset) => { asset['owners'] = null; });
+//    res.send({ data: assets });
+//});
 
 app.post('/login', async (req, res) => {
     let body = req.body;
