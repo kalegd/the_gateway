@@ -13,6 +13,9 @@ import * as THREE from '/library/scripts/three/build/three.module.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
 import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper.js';
 
+const ERR_MSG = 'Error getting model from Sketchfab, please try again later';
+const RATE_LIMIT_MSG = 'Sketchfab download limit reached, please try again tomorrow';
+
 class SketchfabModelPage {
     constructor(controller) {
         this._pivotPoint = new THREE.Object3D();
@@ -21,6 +24,7 @@ class SketchfabModelPage {
         this._createPage();
         this._addPageContent();
         this._createErrorBlock();
+        this._assetsDownloading = new Set();
     }
 
     _createPage() {
@@ -67,7 +71,6 @@ class SketchfabModelPage {
 
         let interactable = new PointerInteractable(this._container.children[0]);
         let backInteractable = new PointerInteractable(backButton, () => {
-            this._reset();
             this._controller.back();
         });
         this._interactables.push(interactable);
@@ -108,7 +111,13 @@ class SketchfabModelPage {
         });
         this._downloadInteractable = new PointerInteractable(
             this._downloadButton,
-            () => { this._download(); });
+            () => { 
+                if(this._downloadButton.children[1].content == "Download") {
+                    this._download();
+                } else {
+                    this._goToLibraryModelPage();
+                }
+            });
         this._interactables.push(previewInteractable);
         this._interactables.push(this._downloadInteractable);
         columnBlock.add(this._imageBlock);
@@ -119,7 +128,7 @@ class SketchfabModelPage {
 
     _createErrorBlock() {
         this._errorMessage = ThreeMeshUIHelper.createTextBlock({
-            'text': 'Error getting model from Sketchfab, please try again later',
+            'text': ERR_MSG,
             'fontColor': new THREE.Color(0x9c0006),
             'backgroundColor': new THREE.Color(0xffc7ce),
             'backgroundOpacity': 0.7,
@@ -136,11 +145,6 @@ class SketchfabModelPage {
         this._pivotPoint.add(this._errorMessage);
     }
 
-    _reset() {
-        this._errorMessage.visible = false;
-        this._downloadButton.visible = true;
-    }
-
     _preview() {
         window.open(this._modelInfo.viewerUrl, '_blank');
     }
@@ -150,6 +154,7 @@ class SketchfabModelPage {
         this._downloadButton.visible = false;
         this._errorMessage.visible = false;
         let request = { 'userId': global.user._id, 'sketchfabUid': this._modelInfo.uid };
+        this._assetsDownloading.add(this._modelInfo.uid);
         $.ajax({
             url: global.API_URL + '/user/sketchfab/model',
             type: 'POST',
@@ -160,26 +165,47 @@ class SketchfabModelPage {
                 xhr.setRequestHeader("Authorization", global.jwt);
             },
             success: (response) => {
-                //TODO: Update asset information for both general asset and user
-                //      library asset. If we're still on this page, then take
-                //      user to Library Model Page
-                console.log(response);
-            },
-            error: (xhr, status, error) => {
-                if(this._pivotPoint.parent) {
+                let asset = response.data;
+                let userAsset = { assetId: asset._id, name: asset.name };
+                global.user.library.assets.push(userAsset);
+                global.userAssetsMap[asset._id] = userAsset;
+                global.assetsMap[asset._id] = asset;
+                this._assetsDownloading.delete(request.sketchfabUid);
+                if(this._pivotPoint.parent && this._modelInfo.uid == asset._id){
+                    this._downloadButton.children[1].set({ content: "See In Library" });
                     this._downloadButton.visible = true;
-                    this._errorMessage.visible = true;
                     global.pointerInteractableManager.addInteractables([
                         this._downloadInteractable]);
                 }
+            },
+            error: (xhr, status, error) => {
+                if(this._pivotPoint.parent &&
+                    this._modelInfo.uid == request.sketchfabUid)
+                {
+                    this._downloadButton.visible = true;
+                    this._errorMessage.visible = true;
+                    this._errorMessage.children[1].set({
+                        content: (xhr.status == 429) ? RATE_LIMIT_MSG : ERR_MSG
+                    });
+                    global.pointerInteractableManager.addInteractables([
+                        this._downloadInteractable]);
+                }
+                this._assetsDownloading.delete(request.sketchfabUid);
             }
         });
     }
 
-
+    _goToLibraryModelPage() {
+        let asset = global.userAssetsMap[this._modelInfo.uid];
+        let page = this._controller.getPage(
+            HomeSceneMenus.LIBRARY_MODEL);
+        page.loadModelInfo(asset);
+        this._controller.goToPageFromRoot(
+            HomeSceneMenus.LIBRARY_MODEL);
+    }
 
     loadModelInfo(data) {
-        console.log(data);
+        //console.log(data);
         this._modelInfo = data;
         let url = this._getPreviewUrl(data);
         new THREE.TextureLoader().load(url, (texture) => {
@@ -189,6 +215,12 @@ class SketchfabModelPage {
             }
         });
         this._titleBlock.children[1].set({ content: data.name });
+        if(global.userAssetsMap[this._modelInfo.uid]) {
+            this._downloadButton.children[1].set({ content: "See In Library" });
+            return;
+        } else if(this._assetsDownloading.has(data.uid)) {
+            this._downloadButton.visible = false;
+        }
     }
 
     _getPreviewUrl(data) {
@@ -204,18 +236,27 @@ class SketchfabModelPage {
         return null;
     }
 
-    _cleanup() {
+    cleanup() {
+        if(this._downloadButton.children[1].content != "Download") {
+            this._downloadButton.children[1].set({ content: "Download" });
+        }
         this._imageBlock.set({ backgroundTexture: null });
         if(this._texture) {
             this._texture.dispose();
             this._texture = null;
         }
+        this._errorMessage.visible = false;
+        this._downloadButton.visible = true;
     }
 
     addToScene(scene) {
         if(scene) {
             scene.add(this._pivotPoint);
-            global.pointerInteractableManager.addInteractables(this._interactables);
+            if(this._downloadButton.visible) {
+                global.pointerInteractableManager.addInteractables(this._interactables);
+            } else {
+                global.pointerInteractableManager.addInteractables(this._interactables.slice(0,3));
+            }
         }
     }
 
@@ -223,7 +264,6 @@ class SketchfabModelPage {
         if(this._pivotPoint.parent) {
             this._pivotPoint.parent.remove(this._pivotPoint);
             this._errorMessage.visible = false;
-            this._cleanup();
             fullDispose(this._pivotPoint);
         }
         global.pointerInteractableManager.removeInteractables(this._interactables);

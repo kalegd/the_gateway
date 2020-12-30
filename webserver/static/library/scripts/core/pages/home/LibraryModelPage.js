@@ -148,7 +148,7 @@ class LibraryModelPage {
         return previewUrl;
     }
 
-    _cleanup() {
+    cleanup() {
         this._imageBlock.set({ backgroundTexture: null });
         if(this._texture) {
             this._texture.dispose();
@@ -167,7 +167,6 @@ class LibraryModelPage {
         if(this._pivotPoint.parent) {
             this._pivotPoint.parent.remove(this._pivotPoint);
             this._errorMessage.visible = false;
-            this._cleanup();
             fullDispose(this._pivotPoint);
         }
         global.pointerInteractableManager.removeInteractables(this._interactables);

@@ -58,9 +58,25 @@ class MenuController {
     back() {
         let currentPage = this._getCurrentPage();
         currentPage.removeFromScene();
+        if(currentPage.cleanup) {
+            currentPage.cleanup();
+        }
         this._pageCalls.pop();
         currentPage = this._getCurrentPage();
         currentPage.addToScene(this._scene);
+    }
+
+    goToPageFromRoot(page) {
+        let currentPage = this._getCurrentPage();
+        currentPage.removeFromScene();
+        while(this._pageCalls.length > 1) {
+            let page = this._pages[this._pageCalls.pop()];
+            if(page.cleanup) {
+                page.cleanup();
+            }
+        }
+        this._pageCalls.push(page);
+        this._pages[page].addToScene(this._scene);
     }
 
     addToScene(scene) {

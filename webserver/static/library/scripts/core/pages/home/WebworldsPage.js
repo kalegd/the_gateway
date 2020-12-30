@@ -65,7 +65,6 @@ class WebworldsPage {
 
         let interactable = new PointerInteractable(this._container.children[0]);
         let backInteractable = new PointerInteractable(backButton, () => {
-            this._reset();
             this._controller.back();
         });
         let newWebworldInteractable = new PointerInteractable(newButton, () => {
@@ -185,7 +184,7 @@ class WebworldsPage {
         global.pointerInteractableManager.addInteractables(this._interactables);
     }
 
-    _reset() {
+    cleanup() {
         this._cursor = 0;
     }
 

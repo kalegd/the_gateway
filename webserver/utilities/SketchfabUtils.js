@@ -3,8 +3,9 @@ const FileType = require('file-type');
 const fs = require('fs');
 
 const API_URL = 'https://api.sketchfab.com/v3';
-const assetsWritePath = 'webserver/static/library/assets/';
-const assetsReadPath = 'library/assets/';
+const WRITE_PATH = 'webserver/static/library/assets/';
+const READ_PATH = 'library/assets/';
+const RATE_LIMIT_EXCEEDED = 429;
 
 class SketchfabUtils {
     async downloadAndSave(uid, sketchfabAPIToken, successCallback, errorCallback) {
@@ -17,8 +18,9 @@ class SketchfabUtils {
             let filenames = await this._saveAssets(uid, model, smallPreviewImage, mediumPreviewImage);
             successCallback(modelInfo, filenames);
         } catch(err) {
-            //TODO: Figure out if rate limit and send that information in the errorCallback if so
-            //console.log(err);
+            if(err == RATE_LIMIT_EXCEEDED) {
+                errorCallback(RATE_LIMIT_EXCEEDED);
+            }
             errorCallback();
         }
     }
@@ -33,6 +35,9 @@ class SketchfabUtils {
         let response = await fetch(API_URL + '/models/' + uid + '/download',
             { headers: { 'Authorization': 'Token ' + sketchfabAPIToken } });
         let json = await response.json();
+        if(response.status == RATE_LIMIT_EXCEEDED) {
+            throw RATE_LIMIT_EXCEEDED;
+        }
         return json.gltf.url;
     }
 
@@ -81,16 +86,16 @@ class SketchfabUtils {
         this._saveAsset(smallImageFilename, smallPreviewImage);
         this._saveAsset(mediumImageFilename, mediumPreviewImage);
         return [
-            assetsReadPath + modelFilename,
-            assetsReadPath + smallImageFilename,
-            assetsReadPath + mediumImageFilename
+            READ_PATH + modelFilename,
+            READ_PATH + smallImageFilename,
+            READ_PATH + mediumImageFilename
         ];
         
     }
 
     _saveAsset(filename, arrayBuffer) {
         let buffer = Buffer.from(arrayBuffer);
-        fs.createWriteStream(assetsWritePath + filename).write(buffer);
+        fs.createWriteStream(WRITE_PATH + filename).write(buffer);
     }
 
 }

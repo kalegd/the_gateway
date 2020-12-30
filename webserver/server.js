@@ -121,7 +121,7 @@ app.get('/user/info', async (req, res) => {
     let scenes = await Database.getAll(sceneIds);
     let assetIds = user.library.assets.map(asset => asset.assetId);
     let assets = await Database.getAll(assetIds);
-    assets.forEach((asset) => { asset['owners'] = null; });
+    assets.forEach((asset) => { delete asset.owners });
     res.send({ data: { user: user, assets: assets, scenes: scenes } });
 });
 
@@ -202,7 +202,8 @@ app.post('/user/sketchfab/model', async (req, res) => {
         for(let i = 0; i < user.library.assets.length; i++) {
             if(user.library.assets[i].id == asset.uid) {
                 //console.log("User already has this asset");
-                res.send({ data: user.library.assets[i] });
+                delete asset.owners;
+                res.send({ data: asset });
                 return;
             }
         }
@@ -214,7 +215,8 @@ app.post('/user/sketchfab/model', async (req, res) => {
         asset.owners.push(userId);
         await Database.updateOne(user._id, user);
         await Database.updateOne(asset._id, asset);
-        res.send({ data: { user: user, asset: asset } });
+        delete asset.owners;
+        res.send({ data: asset });
         return;
     }
     //console.log("About to download stuff");
@@ -232,16 +234,19 @@ app.post('/user/sketchfab/model', async (req, res) => {
                 type: "GLTF",
                 owners: [userId],
             };
+            //Refetch latest user info in case updates occured while downloading
+            user = await Database.getOne(userId);
             user.library.assets.push({
                 assetId: modelInfo.uid,
                 name: modelInfo.name
             });
             await Database.createNew(asset);
             await Database.updateOne(user._id, user);
-            res.send({ data: { user: user, asset: asset } });
+            delete asset.owners;
+            res.send({ data: asset });
         },
-        () => {
-            res.status(503);
+        (statusOverride) => {
+            res.status((statusOverride) ? statusOverride : 503);
             res.send();
             return;
 

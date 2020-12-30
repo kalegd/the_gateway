@@ -30,7 +30,12 @@ export default class HomeSceneController {
             },
             success: (response) => {
                 global.user = response.data.user;
-                global.assets = response.data.assets;
+                //global.assets = response.data.assets;
+                global.userAssetsMap = response.data.user.library.assets.reduce(
+                    function(map, asset) {
+                        map[asset.assetId] = asset;
+                        return map;
+                    }, {});
                 global.assetsMap = response.data.assets.reduce(
                     function(map, asset) {
                         map[asset._id] = asset;

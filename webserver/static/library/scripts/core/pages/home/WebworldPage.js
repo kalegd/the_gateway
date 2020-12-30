@@ -74,7 +74,7 @@ class WebworldPage {
         });
         rowBlock.add(backButton);
         rowBlock.add(this._titleBlock);
-        rowBlock.add(saveBlock);
+        rowBlock.add(saveButton);
         this._container.add(rowBlock);
         this._container.set({ fontFamily: FONT_FAMILY, fontTexture: FONT_TEXTURE });
         this._container.rotateY(Math.PI);
@@ -86,7 +86,7 @@ class WebworldPage {
             this._controller.back();
         });
         let saveInteractable = new PointerInteractable(saveButton, () => {
-            this._saveWebworld();
+            this._save();
         });
         this._interactables.push(interactable);
         this._interactables.push(backInteractable);

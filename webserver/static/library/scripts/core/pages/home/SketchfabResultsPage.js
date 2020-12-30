@@ -69,7 +69,6 @@ class SketchfabResultsPage {
         let interactable = new PointerInteractable(this._container.children[0]);
         let backInteractable = new PointerInteractable(backButton, () => {
             this._controller.back();
-            this._cleanup();
         });
         this._interactables.push(interactable);
         this._interactables.push(backInteractable);
@@ -293,7 +292,7 @@ class SketchfabResultsPage {
         this._controller.goToPage(HomeSceneMenus.SKETCHFAB_MODEL);
     }
 
-    _cleanup() {
+    cleanup() {
         for(let i = 0; i < this._previews.length; i++) {
             this._previews[i].set({ backgroundTexture: null });
         }

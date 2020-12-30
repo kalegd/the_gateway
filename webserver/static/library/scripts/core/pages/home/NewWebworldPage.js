@@ -65,7 +65,6 @@ class NewWebworldPage {
 
         let interactable = new PointerInteractable(this._container.children[0]);
         let backInteractable = new PointerInteractable(this._backButton, () => {
-            this._reset();
             this._controller.back();
         });
         this._interactables.push(interactable);
@@ -106,7 +105,7 @@ class NewWebworldPage {
         this._interactables.push(createInteractable);
     }
 
-    _reset() {
+    cleanup() {
         this._nameField.reset();
         this._errorMessage.visible = false;
     }
@@ -132,7 +131,6 @@ class NewWebworldPage {
             },
             success: (response) => {
                 console.log(response);
-                this._reset();
                 //TODO: Go back a page and then to the newly created webworld
                 //      using the id in the response to load the data. Also add
                 //      the new webworld to global.user.scenes

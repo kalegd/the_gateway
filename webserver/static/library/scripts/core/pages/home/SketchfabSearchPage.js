@@ -66,7 +66,6 @@ class SketchfabSearchPage {
 
         let interactable = new PointerInteractable(this._container.children[0]);
         let backInteractable = new PointerInteractable(this._backButton, () => {
-            this._reset();
             this._controller.back();
         });
         this._interactables.push(interactable);
@@ -107,7 +106,7 @@ class SketchfabSearchPage {
         this._interactables.push(searchInteractable);
     }
 
-    _reset() {
+    cleanup() {
         this._searchField.reset();
         this._errorMessage.visible = false;
     }
