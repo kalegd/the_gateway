@@ -1,5 +1,6 @@
 import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
+import WebworldController from '/library/scripts/core/resources/WebworldController.js';
 import global from '/library/scripts/core/resources/global.js';
 import TextField from '/library/scripts/core/resources/TextField.js';
 import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
@@ -121,7 +122,7 @@ class NewWebworldPage {
             'name': this._nameField.content
         };
         $.ajax({
-            url: global.API_URL + '/user/scene',
+            url: global.API_URL + '/user/webworld',
             type: 'POST',
             data: JSON.stringify(request),
             contentType: 'application/json',
@@ -130,10 +131,16 @@ class NewWebworldPage {
                 xhr.setRequestHeader("Authorization", global.jwt);
             },
             success: (response) => {
-                console.log(response);
-                //TODO: Go back a page and then to the newly created webworld
-                //      using the id in the response to load the data. Also add
-                //      the new webworld to global.user.scenes
+                global.user.webworlds.push(response.data._id);
+                global.webworldsMap[response.data._id] = response.data;
+                if(global.user.webworlds.length == 1) {
+                    global.user.defaultWebworld = response.data._id;
+                }
+                WebworldController.setWebworld(response.data);
+                this._controller.back();
+                let page = this._controller.getPage(HomeSceneMenus.WEBWORLD);
+                page.loadData(response.data);
+                this._controller.goToPage(HomeSceneMenus.WEBWORLD);
             },
             error: (xhr, status, error) => {
                 this._errorMessage.visible = true;

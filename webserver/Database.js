@@ -37,7 +37,7 @@ class Database {
         return result;
     }
 
-    async delete(id) {
+    async deleteOne(id) {
         let result = await this._db.remove({ _id: id });
         return result;
     }

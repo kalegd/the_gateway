@@ -3,6 +3,7 @@ import PointLight from '/library/scripts/core/assets/PointLight.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import TitleAndButtonPage from '/library/scripts/core/pages/TitleAndButtonPage.js';
 import MenuController from '/library/scripts/core/pages/home/MenuController.js';
+import WebworldController from '/library/scripts/core/resources/WebworldController.js';
 import global from '/library/scripts/core/resources/global.js';
 import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
 
@@ -41,11 +42,15 @@ export default class HomeSceneController {
                         map[asset._id] = asset;
                         return map;
                     }, {});
-                global.scenesMap = response.data.scenes.reduce(
-                    function(map, scene) {
-                        map[scene._id] = scene;
+                global.webworldsMap = response.data.webworlds.reduce(
+                    function(map, webworld) {
+                        map[webworld._id] = webworld;
                         return map;
                     }, {});;
+                if(global.user.defaultWebworld) {
+                    WebworldController.setWebworld(
+                        global.webworldsMap[global.user.defaultWebworld]);
+                }
                 //console.log(global.user);
                 //console.log(global.assets);
                 //console.log(global.assetsMap);

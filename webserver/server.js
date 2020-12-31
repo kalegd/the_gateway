@@ -58,14 +58,15 @@ app.get('/user', async (req, res) => {
 });
 
 app.post('/user', async (req, res) => {
-    let scene = await Database.createNew({ "assets": [], "name": "Default" });
+    let webworld = await Database.createNew({ "assets": [], "name": "Default"});
     let body = req.body;
     if(body.isPasswordProtected) {
         body.password = shajs('sha256').update(body.password).digest('hex');
     }
     body.sketchfabAPIToken = "";
     body.library = { "assets": [] };
-    body.scenes = [scene._id];
+    body.webworlds = [webworld._id];
+    body.defaultWebworld = webworld._id;
     let record = await Database.createNew(req.body);
     //Update list of user ids
     let userIds = await Database.getOne("userIds");
@@ -94,7 +95,7 @@ app.delete('/user', async (req, res) => {
         res.send({ "message": "You do not have permission for this action" });
         return;
     }
-    let result = await Database.delete(req.body.id);
+    let result = await Database.deleteOne(req.body.id);
     if(result) {
         res.send({});
     } else {
@@ -117,15 +118,42 @@ app.get('/user/info', async (req, res) => {
         res.send();
         return;
     }
-    let sceneIds = user.scenes;
-    let scenes = await Database.getAll(sceneIds);
+    let webworldIds = user.webworlds;
+    let webworlds = await Database.getAll(webworldIds);
     let assetIds = user.library.assets.map(asset => asset.assetId);
     let assets = await Database.getAll(assetIds);
     assets.forEach((asset) => { delete asset.owners });
-    res.send({ data: { user: user, assets: assets, scenes: scenes } });
+    res.send({ data: { user: user, assets: assets, webworlds: webworlds } });
 });
 
-app.post('/user/scene', async (req, res) => {
+app.put('/user/defaultWebworld', async (req, res) => {
+    let authRecord = UserUtils.getAuthRecord(req);
+    if(!authRecord) {
+        res.status(401);
+        res.send({ "message": "Invalid Auth Token" });
+        return;
+    } else if(authRecord.userId != req.body.userId) {
+        res.status(403);
+        res.send({ "message": "You do not have permission for this action" });
+        return;
+    } else if(!req.body.webworldId) {
+        res.status(422);
+        res.send({ "message": "Missing parameter 'webworldId'" });
+    }
+    let userId = authRecord.userId;
+    let user = await Database.getOne(userId);
+    let webworld = await Database.getOne(req.body.webworldId);
+    if(user == null || webworld == null) {
+        res.status(404);
+        res.send();
+        return;
+    }
+    user.defaultWebworld = webworld._id;
+    await Database.updateOne(user._id, user);
+    res.send({});
+});
+
+app.post('/user/webworld', async (req, res) => {
     let authRecord = UserUtils.getAuthRecord(req);
     if(!authRecord) {
         res.status(401);
@@ -146,10 +174,72 @@ app.post('/user/scene', async (req, res) => {
         res.send();
         return;
     }
-    let scene = await Database.createNew({"assets": [], "name": req.body.name});
-    user.scenes.push(scene._id);
+    let webworld = await Database.createNew(
+        { "assets": [], "name": req.body.name });
+    user.webworlds.push(webworld._id);
+    if(user.webworlds.length == 1) {
+        user.defaultWebworld = webworld._id;
+    }
     await Database.updateOne(userId, user);
-    res.send({ data: scene });
+    res.send({ data: webworld });
+});
+
+app.put('/user/webworld', async (req, res) => {
+    let authRecord = UserUtils.getAuthRecord(req);
+    if(!authRecord) {
+        res.status(401);
+        res.send({ "message": "Invalid Auth Token" });
+        return;
+    } else if(authRecord.userId != req.body.userId) {
+        res.status(403);
+        res.send({ "message": "You do not have permission for this action" });
+        return;
+    } else if(!req.body.webworld) {
+        res.status(422);
+        res.send({ "message": "Missing parameter 'webworld'" });
+    }
+    let webworld = await Database.getOne(req.body.webworld._id);
+    if(webworld == null) {
+        res.status(404);
+        res.send();
+        return;
+    }
+    await Database.updateOne(webworld._id, webworld);
+    res.send({});
+});
+
+app.delete('/user/webworld', async (req, res) => {
+    let authRecord = UserUtils.getAuthRecord(req);
+    if(!authRecord) {
+        res.status(401);
+        res.send({ "message": "Invalid Auth Token" });
+        return;
+    } else if(authRecord.userId != req.body.userId) {
+        res.status(403);
+        res.send({ "message": "You do not have permission for this action" });
+        return;
+    } else if(!req.body.webworldId) {
+        res.status(422);
+        res.send({ "message": "Missing parameter 'webworldId'" });
+    }
+    let userId = authRecord.userId;
+    let user = await Database.getOne(userId);
+    let webworld = await Database.getOne(req.body.webworldId);
+    if(user == null || webworld == null) {
+        res.status(404);
+        res.send();
+        return;
+    }
+    user.webworlds = user.webworlds.filter(
+        webworldId => webworldId != webworld._id);
+    if(user.defaultWebworld == webworld._id) {
+        user.defaultWebworld = (user.webworlds.length > 0)
+            ? user.webworlds[0]
+            : null;
+    }
+    await Database.updateOne(userId, user);
+    await Database.deleteOne(webworld._id);
+    res.send({});
 });
 
 app.put('/user/sketchfab', async (req, res) => {

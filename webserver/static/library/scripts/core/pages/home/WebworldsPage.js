@@ -103,10 +103,10 @@ class WebworldsPage {
             this._webworldButtons.push(webworldButton);
             columnBlock.add(webworldButton);
             let interactable = new PointerInteractable(webworldButton, () => {
-                let sceneIndex = this._cursor + i;
-                let scene = global.scenesMap[global.user.scenes[sceneIndex]];
+                let webworldIndex = this._cursor + i;
+                let webworld = global.webworldsMap[global.user.webworlds[webworldIndex]];
                 let page = this._controller.getPage(HomeSceneMenus.WEBWORLD);
-                page.loadData(scene);
+                page.loadData(webworld);
                 this._controller.goToPage(HomeSceneMenus.WEBWORLD);
             });
             this._interactables.push(interactable);
@@ -144,7 +144,7 @@ class WebworldsPage {
     }
 
     _nextPage() {
-        if(this._cursor + MAX_DISPLAYED <= global.user.scenes.length) {
+        if(this._cursor + MAX_DISPLAYED <= global.user.webworlds.length) {
             this._cursor += this._previews.length;
             this._updateMenu();
         }
@@ -156,11 +156,11 @@ class WebworldsPage {
 
         for(let i = 0; i < MAX_DISPLAYED; i++) {
             let webworldButton = this._webworldButtons[i];
-            if(this._cursor + i < global.user.scenes.length) {
-                let sceneIndex = this._cursor + i;
-                let scene = global.scenesMap[global.user.scenes[sceneIndex]];
+            if(this._cursor + i < global.user.webworlds.length) {
+                let webworldIndex = this._cursor + i;
+                let webworld = global.webworldsMap[global.user.webworlds[webworldIndex]];
                 webworldButton.children[1].set({
-                    content: scene.name
+                    content: webworld.name
                 });
                 webworldButton.visible = true;
                 this._interactables.push(this._webworldInteractables[i]);
@@ -168,7 +168,7 @@ class WebworldsPage {
                 webworldButton.visible = false;
             }
         }
-        if(this._cursor + MAX_DISPLAYED < global.user.scenes.length) {
+        if(this._cursor + MAX_DISPLAYED < global.user.webworlds.length) {
             this._nextButton.visible = true;
             this._interactables.push(this._nextInteractable);
         } else {

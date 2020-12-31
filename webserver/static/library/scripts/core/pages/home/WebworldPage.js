@@ -1,6 +1,7 @@
 import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import ConfirmationPage from '/library/scripts/core/pages/ConfirmationPage.js';
+import WebworldController from '/library/scripts/core/resources/WebworldController.js';
 import global from '/library/scripts/core/resources/global.js';
 import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
 import {
@@ -23,11 +24,11 @@ let links = [{
         "userFriendlyName": "Create Copy",
         "function": "_createCopy"
     }, {
-        "userFriendlyName": "Make Default",
-        "function": "_makeDefault"
-    }, {
         "userFriendlyName": "Delete",
         "function": "_delete"
+    }, {
+        "userFriendlyName": "Make Default",
+        "function": "_makeDefault"
     }];
 
 class WebworldPage {
@@ -37,6 +38,7 @@ class WebworldPage {
         this._interactables = [];
         this._createPage();
         this._addPageContent();
+        this._createErrorBlock();
     }
 
     _createPage() {
@@ -66,7 +68,7 @@ class WebworldPage {
             'width': 0.5,
             'margin': 0.07,
         });
-        let saveButton = ThreeMeshUIHelper.createButtonBlock({
+        this._saveButton = ThreeMeshUIHelper.createButtonBlock({
             'text': 'Save',
             'fontSize': 0.08,
             'height': 0.1,
@@ -74,7 +76,7 @@ class WebworldPage {
         });
         rowBlock.add(backButton);
         rowBlock.add(this._titleBlock);
-        rowBlock.add(saveButton);
+        rowBlock.add(this._saveButton);
         this._container.add(rowBlock);
         this._container.set({ fontFamily: FONT_FAMILY, fontTexture: FONT_TEXTURE });
         this._container.rotateY(Math.PI);
@@ -85,7 +87,7 @@ class WebworldPage {
         let backInteractable = new PointerInteractable(backButton, () => {
             this._controller.back();
         });
-        let saveInteractable = new PointerInteractable(saveButton, () => {
+        let saveInteractable = new PointerInteractable(this._saveButton, () => {
             this._save();
         });
         this._interactables.push(interactable);
@@ -102,6 +104,7 @@ class WebworldPage {
             'justifyContent': 'start',
             'backgroundOpacity': 0,
         });
+        this._buttons = [];
         for(let i = 0; i < links.length; i++) {
             let linkButton = ThreeMeshUIHelper.createButtonBlock({
                 'text': links[i].userFriendlyName,
@@ -109,8 +112,10 @@ class WebworldPage {
                 'height': 0.1,
                 'width': 1,
             });
+            this._buttons.push(linkButton);
             columnBlock.add(linkButton);
             let interactable = new PointerInteractable(linkButton, () => {
+                this._errorMessage.visible = false;
                 this[links[i].function]();
             });
             this._interactables.push(interactable);
@@ -118,8 +123,29 @@ class WebworldPage {
         this._container.add(columnBlock);
     }
 
+    _createErrorBlock() {
+        this._errorMessage = ThreeMeshUIHelper.createTextBlock({
+            'text': 'Error saving Webworld, please try again',
+            'fontColor': new THREE.Color(0x9c0006),
+            'backgroundColor': new THREE.Color(0xffc7ce),
+            'backgroundOpacity': 0.7,
+            'fontSize': 0.08,
+            'height': 0.2,
+            'width': 1.4,
+            'margin': 0
+        });
+        this._errorMessage.rotateY(Math.PI);
+        this._errorMessage.position.setY(0.85);
+        this._errorMessage.position.setZ(1.9);
+        this._errorMessage.set({ fontFamily: FONT_FAMILY, fontTexture: FONT_TEXTURE });
+        this._errorMessage.visible = false;
+        this._pivotPoint.add(this._errorMessage);
+    }
+
     _select() {
-        console.log("TODO: Use this webworld as the active webworld");
+        WebworldController.setWebworld(this._webworld);
+        this._buttons[0].visible = false;
+        global.pointerInteractableManager.removeInteractables([this._interactables[3]]);
     }
 
     _goToAssets() {
@@ -131,11 +157,43 @@ class WebworldPage {
     }
 
     _makeDefault() {
-        console.log("TODO: Make this webworld the default");
+        this._buttons[4].visible = false;
+        global.pointerInteractableManager.removeInteractables([this._interactables[7]]);
+        let request = {
+            'userId': global.user._id,
+            'webworldId': this._webworld._id
+        };
+        this._activeDefaultRequest = true;
+        $.ajax({
+            url: global.API_URL + '/user/defaultWebworld',
+            type: 'PUT',
+            data: JSON.stringify(request),
+            contentType: 'application/json',
+            dataType: 'json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", global.jwt);
+            },
+            success: (response) => {
+                global.user.defaultWebworld = request.webworldId;
+                this._handleMakeDefaultResponse();
+            },
+            error: (xhr, status, error) => {
+                this._handleMakeDefaultResponse();
+            }
+        });
+    }
+
+    _handleMakeDefaultResponse() {
+        this._activeDefaultRequest = false;
+        if(this._pivotPoint.parent
+            && this._webworld._id != global.user.defaultWebworld)
+        {   
+            this._buttons[4].visible = true;
+            global.pointerInteractableManager.addInteractables([this._interactables[7]]);
+        }
     }
 
     _delete() {
-        console.log("TODO: Delete Webworld");
         if(!this._confirmationPage) {
             let errorMessage = ThreeMeshUIHelper.createTextBlock({
                 'text': 'Error deleting Webworld, please try again later',
@@ -163,10 +221,10 @@ class WebworldPage {
         this._confirmationPage.hideErrorMessage();
         let request = {
             'userId': global.user._id,
-            'sceneId': this._webworld._id
+            'webworldId': this._webworld._id
         };
         $.ajax({
-            url: global.API_URL + '/user/scene',
+            url: global.API_URL + '/user/webworld',
             type: 'DELETE',
             data: JSON.stringify(request),
             contentType: 'application/json',
@@ -175,10 +233,25 @@ class WebworldPage {
                 xhr.setRequestHeader("Authorization", global.jwt);
             },
             success: (response) => {
-                //TODO: Delete scene from global.user and global.scenesMap. If
-                //      this scene is currently selected then use next highest
-                //      priority scene. Go back a page
-                console.log("TODO: Delete scene");
+                //TODO: Delete webworld from global.user and global.webworldsMap. If
+                //      this webworld is currently selected then use next highest
+                //      priority webworld. Go back a page
+                global.user.webworlds = global.user.webworlds.filter(
+                    webworldId => webworldId != request.webworldId);
+                delete global.webworldsMap[request.webworldId];
+                if(global.user.defaultWebworld == request.webworldId) {
+                    global.user.defaultWebworld = (global.user.webworlds.length > 0)
+                        ? global.user.webworlds[0]
+                        : null;
+                }
+                if(global.activeWebworld == request.webworldId) {
+                    //if(global.user.webworlds.length > 0) {
+                    //    WebworldController.setWebworld(
+                    //        global.webworldsMap[global.user.webworlds[0]]);
+                    //} else {
+                        WebworldController.clearWebworld();
+                    //}
+                }
                 this._confirmationPage.removeFromScene();
                 this._controller.back();
             },
@@ -196,19 +269,60 @@ class WebworldPage {
     }
 
     loadData(data) {
-        console.log(data);
         this._webworld = data;
         this._titleBlock.children[1].set({ content: data.name });
+        if(global.activeWebworld == data._id) {
+            this._buttons[0].visible = false;
+        } else {
+            this._buttons[0].visible = true;
+        }
+        if(global.user.defaultWebworld == data._id || this._activeDefaultRequest) {
+            this._buttons[4].visible = false;
+        } else {
+            this._buttons[4].visible = true;
+        }
     }
 
     _save() {
-        console.log("TODO: Save webworld");
+        this._saveButton.visible = false;
+        global.pointerInteractableManager.removeInteractables([this._interactables[2]]);
+        let request = {
+            'userId': global.user._id,
+            'webworld': this._webworld
+        };
+        $.ajax({
+            url: global.API_URL + '/user/webworld',
+            type: 'PUT',
+            data: JSON.stringify(request),
+            contentType: 'application/json',
+            dataType: 'json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", global.jwt);
+            },
+            success: (response) => {
+                if(this._pivotPoint.parent && this._webworld._id == request.webworld._id) {
+                    this._saveButton.visible = true;
+                    global.pointerInteractableManager.addInteractables([this._interactables[2]]);
+                }
+            },
+            error: (xhr, status, error) => {
+                if(this._pivotPoint.parent && this._webworld._id == request.webworld._id) {
+                    this._errorMessage.visible = true;
+                    this._saveButton.visible = true;
+                    global.pointerInteractableManager.addInteractables([this._interactables[2]]);
+                }
+            }
+        });
+    }
+
+    _getVisibleInteractables() {
+        return this._interactables.filter(i => i.getThreeObj().visible);
     }
 
     addToScene(scene) {
         if(scene) {
             scene.add(this._pivotPoint);
-            global.pointerInteractableManager.addInteractables(this._interactables);
+            global.pointerInteractableManager.addInteractables(this._getVisibleInteractables());
         }
     }
 
