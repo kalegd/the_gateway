@@ -14,6 +14,9 @@ import * as THREE from '/library/scripts/three/build/three.module.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
 import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper.js';
 
+const ERR_MSG = 'Error creating new webworld, please try again later';
+const ERR_NO_NAME = 'Please enter a name for the webworld';
+
 class NewWebworldPage {
     constructor(controller) {
         this._controller = controller;
@@ -89,7 +92,7 @@ class NewWebworldPage {
         let createInteractable = new PointerInteractable(this._createButton,
             () => { this._create(); });
         this._errorMessage = ThreeMeshUIHelper.createTextBlock({
-            'text': 'Error creating new webworld, please try again later',
+            'text': ERR_MSG,
             'fontColor': new THREE.Color(0x9c0006),
             'backgroundColor': new THREE.Color(0xffc7ce),
             'backgroundOpacity': 0.7,
@@ -106,12 +109,11 @@ class NewWebworldPage {
         this._interactables.push(createInteractable);
     }
 
-    cleanup() {
-        this._nameField.reset();
-        this._errorMessage.visible = false;
-    }
-
     _create() {
+        if(this._nameField.isBlank()) {
+            this._errorMessage.set({ content: ERR_NO_NAME });
+            this._errorMessage.visible = true;
+        }
         //I'm okay with this action being a blocking action
         global.pointerInteractableManager.removeInteractables(this._interactables);
         this._errorMessage.visible = false;
@@ -121,6 +123,9 @@ class NewWebworldPage {
             'userId': global.user._id,
             'name': this._nameField.content
         };
+        if(this._progenitorWebworldId) {
+            request.webworldId = this._progenitorWebworldId;
+        }
         $.ajax({
             url: global.API_URL + '/user/webworld',
             type: 'POST',
@@ -143,6 +148,7 @@ class NewWebworldPage {
                 this._controller.goToPage(HomeSceneMenus.WEBWORLD);
             },
             error: (xhr, status, error) => {
+                this._errorMessage.set({ content: ERR_MSG });
                 this._errorMessage.visible = true;
                 this._createButton.visible = true;
                 this._backButton.visible = true;
@@ -165,6 +171,18 @@ class NewWebworldPage {
         this._errorMessage.visible = true;
         global.pointerInteractableManager.addInteractables(this._interactables);
     }
+
+    setProgenitorWebworld(progenitorWebworld) {
+        this._progenitorWebworldId = progenitorWebworld._id;
+        this._nameField.setContent(progenitorWebworld.name + " Copy");
+    }
+
+    cleanup() {
+        this._nameField.reset();
+        this._errorMessage.visible = false;
+        this._progenitorWebworldId = null;
+    }
+
 
     addToScene(scene) {
         if(scene) {

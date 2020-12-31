@@ -154,6 +154,10 @@ class WebworldPage {
 
     _createCopy() {
         console.log("TODO: Go to new Webworld Page with this webworld as template");
+        let page = this._controller.getPage(HomeSceneMenus.NEW_WEBWORLD);
+        page.setProgenitorWebworld(this._webworld);
+        this._controller.back();
+        this._controller.goToPage(HomeSceneMenus.NEW_WEBWORLD);
     }
 
     _makeDefault() {

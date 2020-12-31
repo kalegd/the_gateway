@@ -139,6 +139,7 @@ app.put('/user/defaultWebworld', async (req, res) => {
     } else if(!req.body.webworldId) {
         res.status(422);
         res.send({ "message": "Missing parameter 'webworldId'" });
+        return;
     }
     let userId = authRecord.userId;
     let user = await Database.getOne(userId);
@@ -166,6 +167,7 @@ app.post('/user/webworld', async (req, res) => {
     } else if(!req.body.name) {
         res.status(422);
         res.send({ "message": "Missing parameter 'name'" });
+        return;
     }
     let userId = authRecord.userId;
     let user = await Database.getOne(userId);
@@ -174,8 +176,16 @@ app.post('/user/webworld', async (req, res) => {
         res.send();
         return;
     }
-    let webworld = await Database.createNew(
-        { "assets": [], "name": req.body.name });
+    let webworld;
+    if(req.body.webworldId) {
+        let progenitor = await Database.getOne(req.body.webworldId);
+        progenitor['name'] = req.body.name;
+        delete progenitor['_id'];
+        webworld = await Database.createNew(progenitor);
+    } else {
+        webworld = await Database.createNew(
+            { "assets": [], "name": req.body.name });
+    }
     user.webworlds.push(webworld._id);
     if(user.webworlds.length == 1) {
         user.defaultWebworld = webworld._id;
@@ -197,6 +207,7 @@ app.put('/user/webworld', async (req, res) => {
     } else if(!req.body.webworld) {
         res.status(422);
         res.send({ "message": "Missing parameter 'webworld'" });
+        return;
     }
     let webworld = await Database.getOne(req.body.webworld._id);
     if(webworld == null) {
@@ -221,6 +232,7 @@ app.delete('/user/webworld', async (req, res) => {
     } else if(!req.body.webworldId) {
         res.status(422);
         res.send({ "message": "Missing parameter 'webworldId'" });
+        return;
     }
     let userId = authRecord.userId;
     let user = await Database.getOne(userId);
@@ -278,6 +290,7 @@ app.post('/user/sketchfab/model', async (req, res) => {
     } else if(!req.body.sketchfabUid) {
         res.status(422);
         res.send({ "message": "Missing parameter 'sketchfabUid'" });
+        return;
     }
     let userId = authRecord.userId;
     let sketchfabUid = req.body.sketchfabUid;

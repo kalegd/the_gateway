@@ -96,6 +96,16 @@ class TextField {
         }
     }
 
+    setContent(content) {
+        this.content = content;
+        let textComponent = this.block.children[1];
+        textComponent.set({ content: content });
+    }
+
+    isBlank() {
+        return this.content == "";
+    }
+
     reset() {
         this.content = "";
         let textComponent = this.block.children[1];
