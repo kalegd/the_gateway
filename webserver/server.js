@@ -334,7 +334,8 @@ app.post('/user/sketchfab/model', async (req, res) => {
                 mediumPreviewImage: filepaths[2],
                 name: modelInfo.name,
                 source: "SKETCHFAB",
-                type: "GLTF",
+                type: "MODEL",
+                modelType: "GLTF",
                 owners: [userId],
             };
             //Refetch latest user info in case updates occured while downloading

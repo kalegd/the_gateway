@@ -1,7 +1,8 @@
 import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
+import WebworldController from '/library/scripts/core/resources/WebworldController.js';
 import global from '/library/scripts/core/resources/global.js';
-import { zipToGLTF, fullDispose } from '/library/scripts/core/resources/utils.module.js';
+import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
 import {
     FONT_FAMILY,
     FONT_TEXTURE,
@@ -20,6 +21,7 @@ class LibraryModelPage {
         this._createPage();
         this._addPageContent();
         this._createErrorBlock();
+        this._assetsDownloading = new Set();
     }
 
     _createPage() {
@@ -95,10 +97,10 @@ class LibraryModelPage {
             'height': 0.1,
             'width': 0.55,
         });
-        let addToWebworldInteractable = new PointerInteractable(
+        this._addToWebworldInteractable = new PointerInteractable(
             this._addToWebworldButton,
             () => { this._addToWebworld(); });
-        this._interactables.push(addToWebworldInteractable);
+        this._interactables.push(this._addToWebworldInteractable);
         columnBlock.add(this._imageBlock);
         columnBlock.add(this._addToWebworldButton);
         this._container.add(columnBlock);
@@ -106,7 +108,7 @@ class LibraryModelPage {
 
     _createErrorBlock() {
         this._errorMessage = ThreeMeshUIHelper.createTextBlock({
-            'text': 'Error getting model from Sketchfab, please try again later',
+            'text': 'Error fetching model, please try again later',
             'fontColor': new THREE.Color(0x9c0006),
             'backgroundColor': new THREE.Color(0xffc7ce),
             'backgroundOpacity': 0.7,
@@ -124,10 +126,31 @@ class LibraryModelPage {
     }
 
     _addToWebworld() {
-        console.log("TODO: add model to webworld + scene");
+        global.pointerInteractableManager.removeInteractables([this._addToWebworldInteractable]);
+        let assetId = this._modelInfo.assetId;
+        this._errorMessage.visible = false;
+        this._addToWebworldButton.visible = false;
+        this._assetsDownloading.add(assetId);
+        WebworldController.addAsset(global.assetsMap[this._modelInfo.assetId],
+            () => {//success
+                this._assetsDownloading.delete(assetId);
+                if(this._pivotPoint.parent && this._modelInfo.assetId == assetId) {
+                    this._addToWebworldButton.visible = true;
+                    global.pointerInteractableManager.addInteractables([
+                        this._addToWebworldInteractable]);
+                }
+            }, () => {//error
+                if(this._pivotPoint.parent &&
+                    this._modelInfo.assetId == assetId)
+                {
+                    this._addToWebworldButton.visible = true;
+                    this._errorMessage.visible = true;
+                    global.pointerInteractableManager.addInteractables([
+                        this._addToWebworldInteractable]);
+                }
+                this._assetsDownloading.delete(assetId);
+            });
     }
-
-
 
     loadModelInfo(data) {
         console.log(data);
@@ -140,6 +163,11 @@ class LibraryModelPage {
             }
         });
         this._titleBlock.children[1].set({ content: data.name });
+        if(this._assetsDownloading.has(data.assetId)) {
+            this._addToWebworldButton.visible = false;
+        } else {
+            this._addToWebworldButton.visible = true;
+        }
     }
 
     _getPreviewUrl(data) {
@@ -159,7 +187,11 @@ class LibraryModelPage {
     addToScene(scene) {
         if(scene) {
             scene.add(this._pivotPoint);
-            global.pointerInteractableManager.addInteractables(this._interactables);
+            if(this._addToWebworldButton.visible) {
+                global.pointerInteractableManager.addInteractables(this._interactables);
+            } else {
+                global.pointerInteractableManager.addInteractables(this._interactables.slice(0,2));
+            }
         }
     }
 

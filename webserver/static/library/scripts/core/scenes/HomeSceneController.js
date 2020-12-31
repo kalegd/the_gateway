@@ -56,6 +56,7 @@ export default class HomeSceneController {
                 //console.log(global.assetsMap);
                 console.warn("TODO: Build scene from user assets information");
                 this._menuController.addToScene(this._pivotPoint);
+                WebworldController.addToScene(this._pivotPoint);
             },
             error: (xhr, status, error) => {
                 if(!this._userInfoErrorPage) {
@@ -96,6 +97,7 @@ export default class HomeSceneController {
 
     removeFromScene() {
         this._pivotPoint.parent.remove(this._pivotPoint);
+        WebworldController.removeFromScene();
         fullDispose(this._pivotPoint);
     }
 
