@@ -58,7 +58,7 @@ app.get('/user', async (req, res) => {
 });
 
 app.post('/user', async (req, res) => {
-    let webworld = await Database.createNew({ "assets": [], "name": "Default"});
+    let webworld = await Database.createNew({ "assets": {}, "name": "Default"});
     let body = req.body;
     if(body.isPasswordProtected) {
         body.password = shajs('sha256').update(body.password).digest('hex');
@@ -184,7 +184,7 @@ app.post('/user/webworld', async (req, res) => {
         webworld = await Database.createNew(progenitor);
     } else {
         webworld = await Database.createNew(
-            { "assets": [], "name": req.body.name });
+            { "assets": {}, "name": req.body.name });
     }
     user.webworlds.push(webworld._id);
     if(user.webworlds.length == 1) {
@@ -215,7 +215,7 @@ app.put('/user/webworld', async (req, res) => {
         res.send();
         return;
     }
-    await Database.updateOne(webworld._id, webworld);
+    await Database.updateOne(webworld._id, req.body.webworld);
     res.send({});
 });
 

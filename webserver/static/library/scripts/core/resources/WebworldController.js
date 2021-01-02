@@ -1,7 +1,7 @@
 import AssetTypes from '/library/scripts/core/enums/AssetTypes.js';
 import ModelTypes from '/library/scripts/core/enums/ModelTypes.js';
 import global from '/library/scripts/core/resources/global.js';
-import { zipToGLTF, fullDispose } from '/library/scripts/core/resources/utils.module.js';
+import { zipToGLTF, uuidv4, fullDispose } from '/library/scripts/core/resources/utils.module.js';
 import * as THREE from '/library/scripts/three/build/three.module.js';
 
 class WebworldController {
@@ -17,6 +17,21 @@ class WebworldController {
         this._webworld = webworld;
         console.log("TODO: add assets for webworld");
         global.activeWebworld = webworld._id;
+        for(let assetId in this._webworld.assets) {
+            let asset = global.assetsMap[assetId];
+            fetch(asset.filepath).then((response) => {
+                return response.arrayBuffer();
+            }).then((arrayBuffer) => {
+                zipToGLTF(arrayBuffer,
+                    (gltf) => {
+                        this._gltfMap[asset._id] = gltf;
+                        for(let instance of webworld.assets[assetId]) {
+                            this._addGLTFToScene(assetId, instance, gltf);
+                        }
+                    },
+                    () => console.log("TODO: Notify user of error"))
+            });
+        }
     }
 
     clearWebworld() {
@@ -27,7 +42,7 @@ class WebworldController {
     addAsset(asset, successCallback, errorCallback) {
         if(asset.type == AssetTypes.MODEL) {
             if(asset.modelType == ModelTypes.GLTF) {
-                this._addGLTF(asset, successCallback, errorCallback);
+                this._fetchGLTF(asset, successCallback, errorCallback);
             } else {
                 //TODO: Handle other model types
                 errorCallback();
@@ -38,10 +53,10 @@ class WebworldController {
         }
     }
 
-    _addGLTF(asset, successCallback, errorCallback) {
+    _fetchGLTF(asset, successCallback, errorCallback) {
         if(asset._id in this._gltfMap) {
-            console.log("TODO: Clone GLTF");
-            errorCallback();//Just to reset the button in the meantime
+            this._handleFetchGLTFSuccess(asset, this._gltfMap[asset._id]);
+            successCallback();
             return;
         }
         fetch(asset.filepath).then((response) => {
@@ -49,18 +64,37 @@ class WebworldController {
         }).then((arrayBuffer) => {
             zipToGLTF(arrayBuffer,
                 (gltf) => {
-                    this._handleAddSuccess(asset, gltf);
+                    this._handleFetchGLTFSuccess(asset, gltf);
                     successCallback(); },
                 () => errorCallback());
         });
     }
 
-    _handleAddSuccess(asset, gltf) {
+    _handleFetchGLTFSuccess(asset, gltf) {
         this._gltfMap[asset._id] = gltf;
-        this._pivotPoint.add(gltf.scene);
-        console.log("TODO: add asset data to Webworld");
-        //TODO: add asset data to Webworld. Will need to have an id for each
-        //      instance. Will also need a name, position, and rotation
+        let instance = {
+            instanceId: uuidv4(),
+            position: [0,0,0],
+            rotation: [0,0,0],
+            scale: [1,1,1],
+        };
+        this._addGLTFToScene(asset._id, instance, gltf);
+        if(!(asset._id in this._webworld.assets)) {
+            this._webworld.assets[asset._id] = [];
+        }
+        this._webworld.assets[asset._id].push(instance);
+    }
+
+    _addGLTFToScene(assetId, instance, gltf) {
+        let assetInstance = gltf.scene.clone();
+        assetInstance.position.fromArray(instance.position);
+        assetInstance.rotation.fromArray(instance.rotation);
+        assetInstance.scale.fromArray(instance.scale);
+        this._pivotPoint.add(assetInstance);
+        if(!(assetId in this._assetsMap)) {
+            this._assetsMap[assetId] = {};
+        }
+        this._assetsMap[assetId][instance.instanceId] = assetInstance;
     }
 
     addToScene(scene) {
