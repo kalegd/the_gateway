@@ -15,7 +15,6 @@ class WebworldController {
     setWebworld(webworld) {
         this.clearWebworld();
         this._webworld = webworld;
-        console.log("TODO: add assets for webworld");
         global.activeWebworld = webworld._id;
         for(let assetId in this._webworld.assets) {
             let asset = global.assetsMap[assetId];
@@ -44,11 +43,11 @@ class WebworldController {
             if(asset.modelType == ModelTypes.GLTF) {
                 this._fetchGLTF(asset, successCallback, errorCallback);
             } else {
-                //TODO: Handle other model types
+                //FF: Handle other model types if we ever include them
                 errorCallback();
             }
         } else {
-            //TODO: Handle other asset types
+            //FF: Handle other asset types when we include them
             errorCallback();
         }
     }

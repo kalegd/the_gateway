@@ -117,7 +117,7 @@ class HandsPage {
                 });
                 rowBlock.add(handButton);
                 let interactable = new PointerInteractable(handButton, () => {
-                    console.log("TODO: Use " + hands[index].handId + " Hands");
+                    console.log("FF: Use " + hands[index].handId + " Hands");
                 });
                 this._interactables.push(interactable);
             }

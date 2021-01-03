@@ -149,11 +149,10 @@ class WebworldPage {
     }
 
     _goToAssets() {
-        console.log("TODO: Go to Webworld Assets Page");
+        console.log("FF: Go to Webworld Assets Page");
     }
 
     _createCopy() {
-        console.log("TODO: Go to new Webworld Page with this webworld as template");
         let page = this._controller.getPage(HomeSceneMenus.NEW_WEBWORLD);
         page.setProgenitorWebworld(this._webworld);
         this._controller.back();
@@ -237,9 +236,6 @@ class WebworldPage {
                 xhr.setRequestHeader("Authorization", global.jwt);
             },
             success: (response) => {
-                //TODO: Delete webworld from global.user and global.webworldsMap. If
-                //      this webworld is currently selected then use next highest
-                //      priority webworld. Go back a page
                 global.user.webworlds = global.user.webworlds.filter(
                     webworldId => webworldId != request.webworldId);
                 delete global.webworldsMap[request.webworldId];
@@ -249,12 +245,7 @@ class WebworldPage {
                         : null;
                 }
                 if(global.activeWebworld == request.webworldId) {
-                    //if(global.user.webworlds.length > 0) {
-                    //    WebworldController.setWebworld(
-                    //        global.webworldsMap[global.user.webworlds[0]]);
-                    //} else {
-                        WebworldController.clearWebworld();
-                    //}
+                    WebworldController.clearWebworld();
                 }
                 this._confirmationPage.removeFromScene();
                 this._controller.back();

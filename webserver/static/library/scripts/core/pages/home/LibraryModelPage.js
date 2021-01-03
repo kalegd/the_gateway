@@ -171,7 +171,7 @@ class LibraryModelPage {
     }
 
     _getPreviewUrl(data) {
-        //TODO: Add logic to determine if data is a model, material, or image
+        //We know it's a model, so we know what field to fetch
         let previewUrl = global.assetsMap[data.assetId].mediumPreviewImage;
         return previewUrl;
     }

@@ -96,13 +96,11 @@ class LibraryPage2 {
             });
             columnBlock.add(linkButton);
             let interactable = new PointerInteractable(linkButton, () => {
-                console.log("TODO: Go to " + links[i].pageId + " for " + this._assetType);
                 let page = this._controller.getPage(links[i].pageId);
                 if(links[i].pageId == HomeSceneMenus.LIBRARY_RESULTS) {
-                    console.log("TODO: set asset list appropriately");
                     page.loadData(global.user.library.assets);
                 } else if(links[i].pageId == HomeSceneMenus.LIBRARY_TAGS) {
-                    console.log("TODO: set tag list appropriately");
+                    console.log("FF: set tag list appropriately");
                     page.setTagList([]);
                 } else if(links[i].pageId == HomeSceneMenus.LIBRARY_SEARCH) {
                     page.setAssetType(this._assetType);

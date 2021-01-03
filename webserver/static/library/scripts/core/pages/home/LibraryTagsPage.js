@@ -77,7 +77,7 @@ class LibraryTagsPage {
             'justifyContent': 'start',
             'backgroundOpacity': 0,
         });
-        console.log("TODO: Display list of Tags");
+        console.log("FF: Display list of Tags");
         this._container.add(columnBlock);
     }
 

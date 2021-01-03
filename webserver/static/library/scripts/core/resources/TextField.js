@@ -69,30 +69,30 @@ class TextField {
             textComponent.set({ content: this.content + "|" });
         }
         if(global.deviceType == "XR") {
-            //TODO: Add XR functionality for _activate()
-            console.warn("TODO: Add XR functionality for _activate()");
+            //FF: Add XR functionality for _activate()
+            console.warn("FF: Add XR functionality for _activate()");
         } else if(global.deviceType == "POINTER") {
             document.addEventListener("keydown", this._keyListener);
             document.addEventListener("click", this._clickListener);
             global.keyboardLock = true;
         } else if (global.deviceType == "MOBILE") {
-            //TODO: Add Mobile functionality for _activate()
-            console.warn("TODO: Add Mobile functionality for _activate()");
+            //FF: Add Mobile functionality for _activate()
+            console.warn("FF: Add Mobile functionality for _activate()");
         }
     }
 
     _deactivate() {
         if(global.deviceType == "XR") {
-            //TODO: Add XR functionality for _deactivate()
-            console.warn("TODO: Add XR functionality for _deactivate()");
+            //FF: Add XR functionality for _deactivate()
+            console.warn("FF: Add XR functionality for _deactivate()");
         } else if(global.deviceType == "POINTER") {
             document.removeEventListener("keydown", this._keyListener);
             document.removeEventListener("click", this._clickListener);
             global.keyboardLock = false;
             this._removeCursor();
         } else if (global.deviceType == "MOBILE") {
-            //TODO: Add Mobile functionality for _deactivate()
-            console.warn("TODO: Add Mobile functionality for _deactivate()");
+            //FF: Add Mobile functionality for _deactivate()
+            console.warn("FF: Add Mobile functionality for _deactivate()");
         }
     }
 

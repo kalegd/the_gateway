@@ -21,15 +21,15 @@ class PasswordTextField extends TextField {
             textComponent.set({ content: displayedContent });
         }
         if(global.deviceType == "XR") {
-            //TODO: Add XR functionality for _activate()
-            console.warn("TODO: Add XR functionality for _activate()");
+            //FF: Add XR functionality for _activate()
+            console.warn("FF: Add XR functionality for _activate()");
         } else if(global.deviceType == "POINTER") {
             document.addEventListener("keydown", this._keyListener);
             document.addEventListener("click", this._clickListener);
             global.keyboardLock = true;
         } else if (global.deviceType == "MOBILE") {
-            //TODO: Add Mobile functionality for _activate()
-            console.warn("TODO: Add Mobile functionality for _activate()");
+            //FF: Add Mobile functionality for _activate()
+            console.warn("FF: Add Mobile functionality for _activate()");
         }
     }
 }

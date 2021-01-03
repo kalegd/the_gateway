@@ -54,7 +54,6 @@ export default class HomeSceneController {
                 //console.log(global.user);
                 //console.log(global.assets);
                 //console.log(global.assetsMap);
-                console.warn("TODO: Build scene from user assets information");
                 this._menuController.addToScene(this._pivotPoint);
                 WebworldController.addToScene(this._pivotPoint);
             },

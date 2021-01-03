@@ -77,7 +77,7 @@ class LibrarySearchPage {
             'justifyContent': 'start',
             'backgroundOpacity': 0,
         });
-        console.log("TODO: Display Search Field and Button");
+        console.log("FF: Display Search Field and Button");
         this._container.add(columnBlock);
     }
 
