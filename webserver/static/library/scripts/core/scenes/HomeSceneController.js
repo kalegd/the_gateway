@@ -1,3 +1,4 @@
+import BackendAPI from '/library/scripts/core/apis/BackendAPI.js';
 import AmbientLight from '/library/scripts/core/assets/AmbientLight.js';
 import PointLight from '/library/scripts/core/assets/PointLight.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
@@ -50,27 +51,46 @@ export default class HomeSceneController {
                 if(global.user.defaultWebworld) {
                     WebworldController.setWebworld(
                         global.webworldsMap[global.user.defaultWebworld]);
+                    this._menuController.addToScene(this._pivotPoint);
+                    WebworldController.addToScene(this._pivotPoint);
+                } else {
+                    let request = {
+                        'userId': global.user._id,
+                        'name': 'Default'
+                    };
+                    BackendAPI.createWebworld({
+                        data: request,
+                        success: (response) => {
+                            this._menuController.addToScene(this._pivotPoint);
+                            WebworldController.addToScene(this._pivotPoint);
+                        },
+                        error: (xhr, status, error) => {
+                            this._fetchUserInfoError();
+                        }
+                    });
                 }
                 //console.log(global.user);
                 //console.log(global.assets);
                 //console.log(global.assetsMap);
-                this._menuController.addToScene(this._pivotPoint);
-                WebworldController.addToScene(this._pivotPoint);
             },
             error: (xhr, status, error) => {
-                if(!this._userInfoErrorPage) {
-                    this._userInfoErrorPage = new TitleAndButtonPage({
-                        'Title': 'Error connecting to your Gateway Server',
-                        'Button Text': 'Try Again',
-                        'Button Function': () => {
-                            this._userInfoErrorPage.removeFromScene();
-                            this._fetchUserInfo();
-                        },
-                    });
-                }
-                this._userInfoErrorPage.addToScene(this._pivotPoint);
+                this._fetchUserInfoError();
             }
         });
+    }
+
+    _fetchUserInfoError() {
+        if(!this._userInfoErrorPage) {
+            this._userInfoErrorPage = new TitleAndButtonPage({
+                'Title': 'Error connecting to your Gateway Server',
+                'Button Text': 'Try Again',
+                'Button Function': () => {
+                    this._userInfoErrorPage.removeFromScene();
+                    this._fetchUserInfo();
+                },
+            });
+        }
+        this._userInfoErrorPage.addToScene(this._pivotPoint);
     }
 
     _createMeshes() {

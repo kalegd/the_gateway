@@ -1,3 +1,4 @@
+import BackendAPI from '/library/scripts/core/apis/BackendAPI.js';
 import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import WebworldController from '/library/scripts/core/resources/WebworldController.js';
@@ -126,22 +127,11 @@ class NewWebworldPage {
         if(this._progenitorWebworldId) {
             request.webworldId = this._progenitorWebworldId;
         }
-        $.ajax({
-            url: global.API_URL + '/user/webworld',
-            type: 'POST',
-            data: JSON.stringify(request),
-            contentType: 'application/json',
-            dataType: 'json',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", global.jwt);
-            },
+        BackendAPI.createWebworld({
+            data: request,
             success: (response) => {
-                global.user.webworlds.push(response.data._id);
-                global.webworldsMap[response.data._id] = response.data;
-                if(global.user.webworlds.length == 1) {
-                    global.user.defaultWebworld = response.data._id;
-                }
-                WebworldController.setWebworld(response.data);
+                this._createButton.visible = true;
+                this._backButton.visible = true;
                 this._controller.back();
                 let page = this._controller.getPage(HomeSceneMenus.WEBWORLD);
                 page.loadData(response.data);
@@ -155,21 +145,6 @@ class NewWebworldPage {
                 global.pointerInteractableManager.addInteractables(this._interactables);
             }
         });
-    }
-
-    _processSearchResponse(response) {
-        this._controller.goToPage(HomeSceneMenus.SKETCHFAB_RESULTS);
-        let page = this._controller.getPage(HomeSceneMenus.SKETCHFAB_RESULTS);
-        page.loadInitialData(this._nameField.content, response);
-        this._createButton.visible = true;
-        this._backButton.visible = true;
-    }
-
-    _processErrorResponse() {
-        this._createButton.visible = true;
-        this._backButton.visible = true;
-        this._errorMessage.visible = true;
-        global.pointerInteractableManager.addInteractables(this._interactables);
     }
 
     setProgenitorWebworld(progenitorWebworld) {

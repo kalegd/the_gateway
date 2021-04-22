@@ -1,3 +1,4 @@
+import BackendAPI from '/library/scripts/core/apis/BackendAPI.js';
 import AssetTypes from '/library/scripts/core/enums/AssetTypes.js';
 import ModelTypes from '/library/scripts/core/enums/ModelTypes.js';
 import global from '/library/scripts/core/resources/global.js';
@@ -35,10 +36,43 @@ class WebworldController {
 
     clearWebworld() {
         global.activeWebworld = null;
+        this._webworld = null;
+        for(let assetId in this._assetsMap) {
+            for(let instanceId in this._assetsMap[assetId]) {
+                let assetInstance = this._assetsMap[assetId][instanceId];
+                this._pivotPoint.remove(assetInstance);
+                fullDispose(assetInstance);
+            }
+        }
+        this._assetsMap = {};
+        for(let assetId in this._gltfMap) {
+            fullDispose(this._gltfMap[assetId].scene);
+        }
+        this._gltfMap = {};
         console.log("TODO: clear current webworld assets");
     }
 
     addAsset(asset, successCallback, errorCallback) {
+        if(!this._webworld) {
+            let request = {
+                'userId': global.user._id,
+                'name': 'Default'
+            };
+            BackendAPI.createWebworld({
+                data: request,
+                success: (response) => {
+                    this._addAsset(asset, successCallback, errorCallback);
+                },
+                error: (xhr, status, error) => {
+                    errorCallback();
+                }
+            });
+        } else {
+            this._addAsset(asset, successCallback, errorCallback);
+        }
+    }
+
+    _addAsset(asset, successCallback, errorCallback) {
         if(asset.type == AssetTypes.MODEL) {
             if(asset.modelType == ModelTypes.GLTF) {
                 this._fetchGLTF(asset, successCallback, errorCallback);

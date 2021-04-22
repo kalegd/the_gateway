@@ -1,7 +1,7 @@
 import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import global from '/library/scripts/core/resources/global.js';
-import SketchfabAPI from '/library/scripts/core/resources/SketchfabAPI.js';
+import SketchfabAPI from '/library/scripts/core/apis/SketchfabAPI.js';
 import { zipToGLTF, fullDispose } from '/library/scripts/core/resources/utils.module.js';
 import {
     FONT_FAMILY,

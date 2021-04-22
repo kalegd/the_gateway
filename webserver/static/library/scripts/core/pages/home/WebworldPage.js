@@ -246,6 +246,10 @@ class WebworldPage {
                 }
                 if(global.activeWebworld == request.webworldId) {
                     WebworldController.clearWebworld();
+                    if(global.user.defaultWebworld) {
+                        WebworldController.setWebworld(
+                            global.webworldsMap[global.user.defaultWebworld]);
+                    }
                 }
                 this._confirmationPage.removeFromScene();
                 this._controller.back();
