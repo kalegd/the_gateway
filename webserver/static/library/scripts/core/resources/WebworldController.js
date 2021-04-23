@@ -24,6 +24,7 @@ class WebworldController {
             }).then((arrayBuffer) => {
                 zipToGLTF(arrayBuffer,
                     (gltf) => {
+                        if(global.activeWebworld != webworld._id) return;
                         this._gltfMap[asset._id] = gltf;
                         for(let instance of webworld.assets[assetId]) {
                             this._addGLTFToScene(assetId, instance, gltf);
@@ -49,7 +50,21 @@ class WebworldController {
             fullDispose(this._gltfMap[assetId].scene);
         }
         this._gltfMap = {};
-        console.log("TODO: clear current webworld assets");
+    }
+
+    deleteAsset(assetId) {
+        if(this._assetsMap[assetId]) {
+            for(let instanceId in this._assetsMap[assetId]) {
+                let assetInstance = this._assetsMap[assetId][instanceId];
+                this._pivotPoint.remove(assetInstance);
+                fullDispose(assetInstance);
+            }
+            delete this._assetsMap[assetId];
+        }
+        if(this._gltfMap[assetId]) {
+            fullDispose(this._gltfMap[assetId].scene);
+            delete this._gltfMap[assetId];
+        }
     }
 
     addAsset(asset, successCallback, errorCallback) {

@@ -33,43 +33,37 @@ class BackendAPI {
         });
     }
 
-    searchFrom(query, fromIndex, successCallback, errorCallback) {
+    deleteAsset(params) {
+        let request = params.data || {};
+        let successCallback = params.success || (() => {});
+        let errorCallback = params.error || (() => {});
         $.ajax({
-            url: API_URL + '/search?type=models&downloadable=true&q=' + encodeURI(query) + '&cursor=' + fromIndex,
-            type: 'GET',
+            url: global.API_URL + '/user/asset',
+            type: 'DELETE',
+            data: JSON.stringify(request),
             contentType: 'application/json',
             dataType: 'json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", global.jwt);
+            },
             success: (response) => {
+                let libraryAssets = global.user.library.assets;
+                for(let i = 0; i < libraryAssets.length; i++) {
+                    if(libraryAssets[i].assetId == request.assetId) {
+                        libraryAssets.splice(i,1);
+                        break;
+                    }
+                }
+                delete global.userAssetsMap[request.assetId];
+                for(let webworldId in global.webworldsMap) {
+                    let webworldAssets = global.webworldsMap[webworldId].assets;
+                    delete webworldAssets[request.assetId];
+                }
+                WebworldController.deleteAsset(request.assetId);
                 successCallback(response);
             },
             error: (xhr, status, error) => {
-                errorCallback();
-            }
-        });
-    }
-
-    download(uid, successCallback, errorCallback) {
-        let authHeader = {
-            'Authorization': 'Token ' + global.user.sketchfabAPIToken
-        };
-        $.ajax({
-            url: API_URL + '/models/' + uid + '/download',
-            type: 'GET',
-            contentType: 'application/json',
-            dataType: 'json',
-            headers: authHeader,
-            success: (response) => {
-                fetch(response.gltf.url).then((response) => {
-                    return response.arrayBuffer()
-                }).then((data) => {
-                    successCallback(data);
-                }).catch((error) => {
-                    console.error(error);
-                    errorCallback();
-                })
-            },
-            error: (xhr, status, error) => {
-                errorCallback();
+                errorCallback(xhr, status, error);
             }
         });
     }

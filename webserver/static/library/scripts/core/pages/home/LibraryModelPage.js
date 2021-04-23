@@ -1,5 +1,7 @@
+import BackendAPI from '/library/scripts/core/apis/BackendAPI.js';
 import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
+import ConfirmationPage from '/library/scripts/core/pages/ConfirmationPage.js';
 import WebworldController from '/library/scripts/core/resources/WebworldController.js';
 import global from '/library/scripts/core/resources/global.js';
 import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
@@ -100,9 +102,20 @@ class LibraryModelPage {
         this._addToWebworldInteractable = new PointerInteractable(
             this._addToWebworldButton,
             () => { this._addToWebworld(); });
+        this._deleteButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': "Delete",
+            'fontSize': 0.08,
+            'height': 0.1,
+            'width': 0.55,
+        });
+        this._deleteInteractable = new PointerInteractable(
+            this._deleteButton,
+            () => { this._delete(); });
         this._interactables.push(this._addToWebworldInteractable);
+        this._interactables.push(this._deleteInteractable);
         columnBlock.add(this._imageBlock);
         columnBlock.add(this._addToWebworldButton);
+        columnBlock.add(this._deleteButton);
         this._container.add(columnBlock);
     }
 
@@ -150,6 +163,56 @@ class LibraryModelPage {
                 }
                 this._assetsDownloading.delete(assetId);
             });
+    }
+
+    _delete() {
+        if(!this._confirmationPage) {
+            let errorMessage = ThreeMeshUIHelper.createTextBlock({
+                'text': 'Error deleting Asset, please try again later',
+                'fontColor': new THREE.Color(0x9c0006),
+                'backgroundColor': new THREE.Color(0xffc7ce),
+                'backgroundOpacity': 0.7,
+                'fontSize': 0.08,
+                'height': 0.2,
+                'width': 1.4,
+                'margin': 0
+            });
+            this._confirmationPage = new ConfirmationPage({
+                'Subtitle': "This will delete the model from all of your Webworlds",
+                'Button 1 Function': () => { this._confirmDelete(); },
+                'Button 2 Function': () => { this._declineDelete(); },
+                'Error Message': errorMessage
+            });
+        }
+        this._confirmationPage.addToScene(this._pivotPoint.parent);
+        this.removeFromScene();
+    }
+
+    _confirmDelete() {
+        this._confirmationPage.disableButtons();
+        this._confirmationPage.hideErrorMessage();
+        let request = {
+            userId: global.user._id,
+            assetId: this._modelInfo.assetId
+        };
+        BackendAPI.deleteAsset({
+            data: request,
+            success: () => {
+                this._confirmationPage.removeFromScene();
+                this._controller.back();
+            },
+            error: () => {
+                console.log("TODO: Let the user know we failed");
+                this._confirmationPage.showErrorMessage();
+                this._confirmationPage.enableButtons();
+            }
+        });
+    }
+
+    _declineDelete() {
+        this._confirmationPage.hideErrorMessage();
+        this.addToScene(this._confirmationPage._pivotPoint.parent);
+        this._confirmationPage.removeFromScene();
     }
 
     loadModelInfo(data) {

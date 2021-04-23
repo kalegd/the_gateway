@@ -260,6 +260,7 @@ class LibraryResultsPage {
 
     addToScene(scene) {
         if(scene) {
+            this._updateMenu();
             scene.add(this._pivotPoint);
             global.pointerInteractableManager.addInteractables(this._interactables);
         }

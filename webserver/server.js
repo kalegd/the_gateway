@@ -357,25 +357,44 @@ app.post('/user/sketchfab/model', async (req, res) => {
         });
 });
 
-//app.get('/assets', async (req, res) => {
-//    let authRecord = UserUtils.getAuthRecord(req);
-//    if(!authRecord) {
-//        res.status(401);
-//        res.send({ "message": "Invalid Auth Token" });
-//        return;
-//    }
-//    let userId = authRecord.userId;
-//    let user = await Database.getOne(userId);
-//    if(!user) {
-//        res.status(404);
-//        res.send();
-//        return;
-//    }
-//    let assetIds = user.library.assets.map(asset => asset.assetId);
-//    let assets = await Database.getAll(assetIds);
-//    assets.forEach((asset) => { asset['owners'] = null; });
-//    res.send({ data: assets });
-//});
+app.delete('/user/asset', async (req, res) => {
+    let authRecord = UserUtils.getAuthRecord(req);
+    if(!authRecord) {
+        res.status(401);
+        res.send({ "message": "Invalid Auth Token" });
+        return;
+    } else if(authRecord.userId != req.body.userId) {
+        res.status(403);
+        res.send({ "message": "You do not have permission for this action" });
+        return;
+    } else if(!req.body.assetId) {
+        res.status(422);
+        res.send({ "message": "Missing parameter 'webworldId'" });
+        return;
+    }
+    let userId = authRecord.userId;
+    let user = await Database.getOne(userId);
+    let asset = await Database.getOne(req.body.assetId);
+    if(user == null || asset == null) {
+        res.status(404);
+        res.send();
+        return;
+    }
+    let webworldIds = user.webworlds;
+    let webworlds = await Database.getAll(webworldIds);
+    user.library.assets = user.library.assets.filter(
+        libraryAsset => libraryAsset.assetId != asset._id);
+    asset.owners = asset.owners.filter(ownerId => ownerId != userId);
+    await Database.updateOne(userId, user);
+    await Database.updateOne(asset._id, asset);
+    for(let webworld of webworlds) {
+        if(asset._id in webworld.assets) {
+            delete webworld.assets[asset._id];
+            await Database.updateOne(webworld._id, webworld);
+        }
+    }
+    res.send({});
+});
 
 app.post('/login', async (req, res) => {
     let body = req.body;
