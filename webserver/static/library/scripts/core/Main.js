@@ -77,6 +77,7 @@ export default class Main {
         this._inputHandler = new InputHandler(this._renderer, this._userObj);
         this._audioHandler = new AudioHandler();
         this._pointerInteractableManager = new PointerInteractableManager();
+        global.sessionHandler = this._sessionHandler;
         global.inputHandler = this._inputHandler;
         global.pointerInteractableManager = this._pointerInteractableManager;
     }

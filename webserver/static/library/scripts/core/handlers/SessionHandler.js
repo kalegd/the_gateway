@@ -106,6 +106,18 @@ export default class SessionHandler {
         document.body.appendChild(this._div);
     }
 
+    enableOrbit() {
+        if(this._useOrbitControls) {
+            this._controls.enabled = true;
+        }
+    }
+
+    disableOrbit() {
+        if(this._useOrbitControls) {
+            this._controls.enabled = false;
+        }
+    }
+
     update() {
         if(this._controls && (this._controls.enabled || this._useOrbitControls)) {
             this._controls.update();

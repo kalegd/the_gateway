@@ -58,11 +58,13 @@ class PointerInteractable {
     addSelectedBy(owner) {
         this._selectedOwners.add(owner);
         this.setState(States.SELECTED);
+        global.sessionHandler.disableOrbit();
     }
 
     removeSelectedBy(owner) {
         this._selectedOwners.delete(owner);
         this._determineAndSetState();
+        global.sessionHandler.enableOrbit();
     }
 
     reset() {
