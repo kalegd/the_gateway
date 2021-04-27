@@ -3,7 +3,7 @@ import HomeSceneMenus from '/library/scripts/core/enums/HomeSceneMenus.js';
 import PointerInteractable from '/library/scripts/core/interaction/PointerInteractable.js';
 import WebworldController from '/library/scripts/core/resources/WebworldController.js';
 import global from '/library/scripts/core/resources/global.js';
-import TextField from '/library/scripts/core/resources/TextField.js';
+import TextField from '/library/scripts/core/resources/input/TextField.js';
 import { fullDispose } from '/library/scripts/core/resources/utils.module.js';
 import {
     FONT_FAMILY,

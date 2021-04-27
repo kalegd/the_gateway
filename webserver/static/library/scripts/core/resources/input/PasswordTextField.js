@@ -1,5 +1,5 @@
 import global from '/library/scripts/core/resources/global.js';
-import TextField from '/library/scripts/core/resources/TextField.js';
+import TextField from '/library/scripts/core/resources/input/TextField.js';
 
 class PasswordTextField extends TextField {
     constructor(params) {

@@ -7,7 +7,7 @@ import {
     UI_BACKGROUND_OPACITY
 } from '/library/scripts/core/resources/constants.js';
 import global from '/library/scripts/core/resources/global.js';
-import PasswordTextField from '/library/scripts/core/resources/PasswordTextField.js';
+import PasswordTextField from '/library/scripts/core/resources/input/PasswordTextField.js';
 
 import * as THREE from '/library/scripts/three/build/three.module.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';

@@ -9,6 +9,12 @@ import LibrarySearchPage from '/library/scripts/core/pages/home/LibrarySearchPag
 import LibraryModelPage from '/library/scripts/core/pages/home/LibraryModelPage.js';
 import WebworldPage from '/library/scripts/core/pages/home/WebworldPage.js';
 import WebworldsPage from '/library/scripts/core/pages/home/WebworldsPage.js';
+import WebworldAssetsPage from '/library/scripts/core/pages/home/WebworldAssetsPage.js';
+import WebworldAssetPage from '/library/scripts/core/pages/home/WebworldAssetPage.js';
+import WebworldInstancePage from '/library/scripts/core/pages/home/WebworldInstancePage.js';
+import WebworldTagsPage from '/library/scripts/core/pages/home/WebworldTagsPage.js';
+import WebworldSearchPage from '/library/scripts/core/pages/home/WebworldSearchPage.js';
+import WebworldResultsPage from '/library/scripts/core/pages/home/WebworldResultsPage.js';
 import NewWebworldPage from '/library/scripts/core/pages/home/NewWebworldPage.js';
 import DiscoverPage from '/library/scripts/core/pages/home/DiscoverPage.js';
 import SketchfabNeedTokenPage from '/library/scripts/core/pages/home/SketchfabNeedTokenPage.js';
@@ -30,6 +36,12 @@ class MenuController {
         this._pages[HomeSceneMenus.LIBRARY_MODEL] = new LibraryModelPage(this);
         this._pages[HomeSceneMenus.WEBWORLD] = new WebworldPage(this);
         this._pages[HomeSceneMenus.WEBWORLDS] = new WebworldsPage(this);
+        this._pages[HomeSceneMenus.WEBWORLD_ASSETS] = new WebworldAssetsPage(this);
+        this._pages[HomeSceneMenus.WEBWORLD_ASSET] = new WebworldAssetPage(this);
+        this._pages[HomeSceneMenus.WEBWORLD_INSTANCE] = new WebworldInstancePage(this);
+        this._pages[HomeSceneMenus.WEBWORLD_TAGS] = new WebworldTagsPage(this);
+        this._pages[HomeSceneMenus.WEBWORLD_SEARCH] = new WebworldSearchPage(this);
+        this._pages[HomeSceneMenus.WEBWORLD_RESULTS] = new WebworldResultsPage(this);
         this._pages[HomeSceneMenus.NEW_WEBWORLD] = new NewWebworldPage(this);
         this._pages[HomeSceneMenus.DISCOVER] = new DiscoverPage(this);
         this._pages[HomeSceneMenus.SKETCHFAB_NEED_TOKEN] = new SketchfabNeedTokenPage(this);
@@ -55,13 +67,13 @@ class MenuController {
         this._pages[page].addToScene(this._scene);
     }
 
-    back() {
+    back(skip = 0) {
         let currentPage = this._getCurrentPage();
         currentPage.removeFromScene();
         if(currentPage.cleanup) {
             currentPage.cleanup();
         }
-        this._pageCalls.pop();
+        for(let i = 0; i < skip + 1; i++) this._pageCalls.pop();
         currentPage = this._getCurrentPage();
         currentPage.addToScene(this._scene);
     }

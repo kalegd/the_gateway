@@ -10,22 +10,18 @@ import {
     UI_BACKGROUND_COLOR,
     UI_BACKGROUND_OPACITY
 } from '/library/scripts/core/resources/constants.js';
-
 let links = [{
-        "userFriendlyName": "Hands",
-        "pageId": HomeSceneMenus.HANDS
+        "userFriendlyName": "Browse All",
+        "pageId": HomeSceneMenus.WEBWORLD_RESULTS
     }, {
-        "userFriendlyName": "Library",
-        "pageId": HomeSceneMenus.LIBRARY
+        "userFriendlyName": "Tags",
+        "pageId": HomeSceneMenus.WEBWORLD_TAGS
     }, {
-        "userFriendlyName": "Webworlds",
-        "pageId": HomeSceneMenus.WEBWORLDS
-    }, {
-        "userFriendlyName": "Settings",
-        "pageId": HomeSceneMenus.SETTINGS
+        "userFriendlyName": "Search",
+        "pageId": HomeSceneMenus.WEBWORLD_SEARCH
     }];
 
-class MainMenuPage {
+class WebworldAssetsPage {
     constructor(controller) {
         this._controller = controller;
         this._interactables = [];
@@ -40,20 +36,47 @@ class MainMenuPage {
             backgroundColor: UI_BACKGROUND_COLOR,
             backgroundOpacity: UI_BACKGROUND_OPACITY,
         });
+        let rowBlock = new ThreeMeshUI.Block({
+            'height': 0.2,
+            'width': 1,
+            'contentDirection': 'row',
+            'justifyContent': 'center',
+            'backgroundOpacity': 0,
+        });
+        let backButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': "Back",
+            'fontSize': 0.08,
+            'height': 0.1,
+            'width': 0.3,
+        });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
-            'text': 'Menu',
+            'text': 'Webworld Assets',
             'fontSize': 0.1,
             'height': 0.2,
             'width': 0.5,
+            'margin': 0.07,
         });
-        this._container.add(titleBlock);
+        let spaceBlock = ThreeMeshUIHelper.createTextBlock({
+            'text': ' ',
+            'fontSize': 0.08,
+            'height': 0.1,
+            'width': 0.3,
+        });
+        rowBlock.add(backButton);
+        rowBlock.add(titleBlock);
+        rowBlock.add(spaceBlock);
+        this._container.add(rowBlock);
         this._container.set({ fontFamily: FONT_FAMILY, fontTexture: FONT_TEXTURE });
         this._container.rotateY(Math.PI);
         this._container.position.setY(0.7);
         this._container.position.setZ(2);
 
         let interactable = new PointerInteractable(this._container.children[0]);
+        let backInteractable = new PointerInteractable(backButton, () => {
+            this._controller.back();
+        });
         this._interactables.push(interactable);
+        this._interactables.push(backInteractable);
     }
 
     _addPageContent() {
@@ -73,11 +96,24 @@ class MainMenuPage {
             });
             columnBlock.add(linkButton);
             let interactable = new PointerInteractable(linkButton, () => {
+                let page = this._controller.getPage(links[i].pageId);
+                if(links[i].pageId == HomeSceneMenus.WEBWORLD_RESULTS) {
+                    page.loadData({
+                        assets: this._webworld.assets,
+                        webworldId: this._webworld._id
+                    });
+                } else {
+                    page.loadData(this._webworld);
+                }
                 this._controller.goToPage(links[i].pageId);
             });
             this._interactables.push(interactable);
         }
         this._container.add(columnBlock);
+    }
+
+    loadData(data) {
+        this._webworld = data;
     }
 
     addToScene(scene) {
@@ -96,4 +132,4 @@ class MainMenuPage {
     }
 }
 
-export default MainMenuPage;
+export default WebworldAssetsPage;

@@ -12,7 +12,7 @@ import {
     UI_BACKGROUND_OPACITY
 } from '/library/scripts/core/resources/constants.js';
 let links = [{
-        "userFriendlyName": "Models",
+        "userFriendlyName": "3D Models",
         "assetType": AssetTypes.MODEL
     }, {
         "userFriendlyName": "Materials",
@@ -20,6 +20,8 @@ let links = [{
     }, {
         "userFriendlyName": "Images",
         "assetType": AssetTypes.IMAGE
+    }, {
+        "userFriendlyName": "Discover New Assets",
     }];
 
 class LibraryPage {
@@ -96,11 +98,19 @@ class LibraryPage {
                 'width': 1,
             });
             columnBlock.add(linkButton);
-            let interactable = new PointerInteractable(linkButton, () => {
-                let page = this._controller.getPage(HomeSceneMenus.LIBRARY2);
-                page.setAssetType(links[i].assetType);
-                this._controller.goToPage(HomeSceneMenus.LIBRARY2);
-            });
+            let interactable;
+            if(links[i].assetType) {
+                interactable = new PointerInteractable(linkButton, () => {
+                    let page = this._controller.getPage(HomeSceneMenus.LIBRARY2);
+                    page.setAssetType(links[i].assetType);
+                    this._controller.goToPage(HomeSceneMenus.LIBRARY2);
+                });
+            } else {
+                interactable = new PointerInteractable(linkButton, () => {
+                    let page = this._controller.getPage(HomeSceneMenus.DISCOVER);
+                    this._controller.goToPage(HomeSceneMenus.DISCOVER);
+                });
+            }
             this._interactables.push(interactable);
         }
         this._container.add(columnBlock);

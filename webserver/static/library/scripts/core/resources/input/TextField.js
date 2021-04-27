@@ -6,25 +6,30 @@ import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper
 
 class TextField {
     constructor(params) {
-        this._setupEventListeners(params['onEnter']);
-        this._defaultContent = (params['text']) ? params['text'] : "";
+        this._onEnter = params['onEnter'] || null;
+        this._onUpdate = params['onUpdate'] || null;
+        this._defaultContent = params['text'] || "";
+        this._initialContent = params['initialText'] || "";
         this.content = "";
+        this._setupEventListeners();
         this.block = ThreeMeshUIHelper.createButtonBlock(params);
         this.interactable = new PointerInteractable(this.block,
             () => { this._activate(); });
+
+        if(this._initialContent) this.setContent(this._initialContent);
     }
 
-    _setupEventListeners(onEnterFunc) {
+    _setupEventListeners() {
         this._keyListener = (event) => {
             if(ValidKeys.has(event.key)) {
                 this._appendToContent(event.key);
+                if(this._onUpdate) this._onUpdate();
             } else if(event.key == "Backspace") {
                 this._removeFromEndOfContent();
+                if(this._onUpdate) this._onUpdate();
             } else if(event.key == "Enter") {
                 this._deactivate();
-                if(onEnterFunc) {
-                    onEnterFunc();
-                }
+                if(this._onEnter) this._onEnter();
             }
         };
         this._clickListener = (event) => {
@@ -107,9 +112,13 @@ class TextField {
     }
 
     reset() {
-        this.content = "";
-        let textComponent = this.block.children[1];
-        textComponent.set({ content: this._defaultContent });
+        if(this._initialContent) {
+            this.setContent(this._initialContent);
+        } else {
+            this.content = "";
+            let textComponent = this.block.children[1];
+            textComponent.set({ content: this._defaultContent });
+        }
     }
 }
 

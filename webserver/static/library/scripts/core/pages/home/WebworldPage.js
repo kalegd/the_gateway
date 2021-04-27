@@ -149,7 +149,9 @@ class WebworldPage {
     }
 
     _goToAssets() {
-        console.log("FF: Go to Webworld Assets Page");
+        let page = this._controller.getPage(HomeSceneMenus.WEBWORLD_ASSETS);
+        page.loadData(this._webworld);
+        this._controller.goToPage(HomeSceneMenus.WEBWORLD_ASSETS);
     }
 
     _createCopy() {

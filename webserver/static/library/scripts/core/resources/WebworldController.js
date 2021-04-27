@@ -52,6 +52,46 @@ class WebworldController {
         this._gltfMap = {};
     }
 
+    updateInstance(assetId, instanceId, field, newValue) {
+        if(this._assetsMap[assetId] && this._assetsMap[assetId][instanceId]) {
+            let assetInstance = this._assetsMap[assetId][instanceId];
+            if(field == "position") {
+                assetInstance.position.fromArray(newValue);
+            } else if(field == "rotation") {
+                assetInstance.rotation.fromArray(newValue);
+            } else if(field == "scale") {
+                assetInstance.scale.fromArray(newValue);
+            }
+        }
+        let instances = this._webworld.assets[assetId];
+        for(let i = 0; i < instances.length; i++) {
+            if(instances[i].instanceId == instanceId) {
+                instances[i][field] = newValue;
+                return;
+            }   
+        }   
+    }
+
+    deleteInstance(assetId, instanceId) {
+        console.log(assetId);
+        console.log(instanceId);
+        if(this._assetsMap[assetId] && this._assetsMap[assetId][instanceId]) {
+            let assetInstance = this._assetsMap[assetId][instanceId];
+            this._pivotPoint.remove(assetInstance);
+            fullDispose(assetInstance);
+        }
+        let instances = this._webworld.assets[assetId];
+        for(let i = 0; i < instances.length; i++) {
+            if(instances[i].instanceId == instanceId) {
+                instances.splice(i,1);
+                if(instances.length == 0) {
+                    delete this._webworld.assets[assetId];
+                }
+                return;
+            }
+        }
+    }
+
     deleteAsset(assetId) {
         if(this._assetsMap[assetId]) {
             for(let instanceId in this._assetsMap[assetId]) {
@@ -121,6 +161,7 @@ class WebworldController {
     _handleFetchGLTFSuccess(asset, gltf) {
         this._gltfMap[asset._id] = gltf;
         let instance = {
+            name: "Instance",
             instanceId: uuidv4(),
             position: [0,0,0],
             rotation: [0,0,0],
