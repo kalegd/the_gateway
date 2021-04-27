@@ -1,5 +1,5 @@
 
-import { Object3D } from '/library/scripts/three/build/three.module.js';
+import { Object3D } from 'three';
 
 import InlineComponent from './core/InlineComponent.js';
 import MeshUIComponent from './core/MeshUIComponent.js';

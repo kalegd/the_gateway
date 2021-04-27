@@ -1,5 +1,5 @@
 
-import { ShaderMaterial } from '/library/scripts/three/build/three.module.js';
+import { ShaderMaterial } from 'three';
 import Defaults from '../../utils/Defaults.js';
 
 /**
@@ -165,7 +165,10 @@ export default function MaterialManager( Base = class {} ) {
                 transparent: true,
                 clipping: true,
                 vertexShader: textVertex,
-                fragmentShader: textFragment
+                fragmentShader: textFragment,
+                extensions: {
+                    derivatives: true
+                }
             })
 
         }
@@ -190,7 +193,10 @@ export default function MaterialManager( Base = class {} ) {
                 transparent: true,
                 clipping: true,
                 vertexShader: backgroundVertex,
-                fragmentShader: backgroundFragment
+                fragmentShader: backgroundFragment,
+                extensions: {
+                    derivatives: true
+                }
             })
 
         }
@@ -213,7 +219,7 @@ const textVertex = `
 		vUv = uv;
 		vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 		gl_Position = projectionMatrix * mvPosition;
-		gl_Position.z-= 0.005;
+		gl_Position.z -= 0.00001;
 
 		#include <clipping_planes_vertex>
 
@@ -223,10 +229,6 @@ const textVertex = `
 //
 
 const textFragment = `
-	#ifdef GL_OES_standard_derivatives
-	#extension GL_OES_standard_derivatives : enable
-	#endif
-
 	uniform sampler2D u_texture;
 	uniform vec3 u_color;
 	uniform float u_opacity;
@@ -274,10 +276,6 @@ const backgroundVertex = `
 //
 
 const backgroundFragment = `
-	#ifdef GL_OES_standard_derivatives
-	#extension GL_OES_standard_derivatives : enable
-	#endif
-
 	uniform sampler2D u_texture;
 	uniform vec3 u_color;
 	uniform float u_opacity;

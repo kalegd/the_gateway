@@ -1,8 +1,8 @@
 
-import { ShapeBufferGeometry } from '/library/scripts/three/build/three.module.js';
-import { Mesh } from '/library/scripts/three/build/three.module.js';
-import { Vector2 } from '/library/scripts/three/build/three.module.js';
-import { Shape } from '/library/scripts/three/build/three.module.js';
+import { ShapeBufferGeometry } from 'three';
+import { Mesh } from 'three';
+import { Vector2 } from 'three';
+import { Shape } from 'three';
 
 /**
  * Job: Create and return a plane mesh according to dimensions and style parameters

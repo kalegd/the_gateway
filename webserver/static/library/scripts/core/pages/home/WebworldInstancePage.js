@@ -115,6 +115,7 @@ class WebworldInstancePage {
             this._rotationInput.interactables);
         Array.prototype.push.apply(this._interactables,
             this._scaleInput.interactables);
+        this._container.update(false, true, false);
     }
 
     _createCopy() {

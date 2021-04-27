@@ -1,6 +1,6 @@
 
-import { Color } from '/library/scripts/three/build/three.module.js';
-import { CanvasTexture } from '/library/scripts/three/build/three.module.js';
+import { Color } from 'three';
+import { CanvasTexture } from 'three';
 
 /** List the default values of the lib components */
 export default {
