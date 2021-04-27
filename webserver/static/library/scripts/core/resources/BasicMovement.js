@@ -51,7 +51,7 @@ export default class BasicMovement {
         this._velocity.x -= this._velocity.x * 10.0 * timeDelta;
         this._velocity.z -= this._velocity.z * 10.0 * timeDelta;
 
-        if(!global.keyboardLock) {
+        if(global.sessionActive && !global.keyboardLock) {
             let movingDistance = 10.0 * this._movementSpeed * timeDelta;
             if (global.inputHandler.isKeyPressed("ArrowUp") || global.inputHandler.isKeyPressed("KeyW")) {
                 this._velocity.z += movingDistance;
@@ -125,4 +125,3 @@ export default class BasicMovement {
         ];
     }
 }
-

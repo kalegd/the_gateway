@@ -138,6 +138,7 @@ class PointerInteractableManager {
     }
 
     _updateForXR() {
+        if(!global.sessionActive) return;
         let controllers = {};
         let controllerOptions = ['LEFT', 'RIGHT'];
         for(let i = 0; i < controllerOptions.length; i++) {
@@ -154,6 +155,7 @@ class PointerInteractableManager {
     }
 
     _updateForPointer() {
+        if(!global.sessionActive) return;
         let controllers = {
             "POINTER": {
                 raycaster: this._getRaycaster("POINTER"),
@@ -167,7 +169,7 @@ class PointerInteractableManager {
     }
 
     _updateForMobile() {
-        
+        if(!global.sessionActive) return;
     }
 
 }

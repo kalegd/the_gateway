@@ -5,7 +5,6 @@ import PointerInteractableManager from '/library/scripts/core/interaction/Pointe
 import Background from '/library/scripts/core/resources/Background.js';
 import SceneNames from '/library/scripts/core/enums/SceneNames.js';
 
-import AudioHandler from '/library/scripts/core/handlers/AudioHandler.js';
 import InputHandler from '/library/scripts/core/handlers/InputHandler.js';
 import SessionHandler from '/library/scripts/core/handlers/SessionHandler.js';
 import global from '/library/scripts/core/resources/global.js';
@@ -73,9 +72,8 @@ export default class Main {
     }
 
     _createHandlers() {
-        this._sessionHandler = new SessionHandler({ "Orbit Controls": true });
+        this._sessionHandler = new SessionHandler();
         this._inputHandler = new InputHandler(this._renderer, this._userObj);
-        this._audioHandler = new AudioHandler();
         this._pointerInteractableManager = new PointerInteractableManager();
         global.sessionHandler = this._sessionHandler;
         global.inputHandler = this._inputHandler;
@@ -87,15 +85,6 @@ export default class Main {
             "Path": "/library/backgrounds/space_compressed/",
             "File Extension": ".jpg"
         });
-
-        //let loginSceneController = new LoginSceneController();
-        //let userController = new UserController();
-
-        //loginSceneController.addToScene(this._scene);
-        //userController.addToScene();
-
-        //this._dynamicAssets.push(userController);
-        //this._dynamicAssets.push(loginSceneController);
 
         this._sceneController = new LoginSceneController();
         this._userController = new UserController({
@@ -129,6 +118,7 @@ export default class Main {
     _loading() {
         if(global.loadingAssets.size == 0) {
             $(this._loadingMessage).removeClass("loading");
+            this._sessionHandler.displayButton();
             if(global.deviceType == "XR") {
                 this._sessionHandler.displayButton();
                 this._renderer.setAnimationLoop((time, frame) => {
@@ -137,12 +127,12 @@ export default class Main {
                 });
             } else if (global.deviceType == "POINTER") {
                 this._renderer.setAnimationLoop(() => {
-                    this._sessionHandler.update();
+                    //this._sessionHandler.update();
                     this._update();
                 });
             } else if (global.deviceType == "MOBILE") {
                 this._renderer.setAnimationLoop(() => {
-                    this._sessionHandler.update();
+                    //this._sessionHandler.update();
                     this._update();
                 });
             }
@@ -169,9 +159,6 @@ export default class Main {
         }
         this._userController.update(timeDelta);
         this._sceneController.update(timeDelta);
-        //for(let i = 0; i < this._dynamicAssets.length; i++) {
-        //    this._dynamicAssets[i].update(timeDelta);
-        //}
         this._renderer.render(this._scene, this._camera);
         this._stats.end();
     }
