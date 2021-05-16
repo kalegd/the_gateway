@@ -54,13 +54,13 @@ export const createLoadingLock = () => {
 
 export const zipToGLTF = (arrayBuffer, successCallback, errorCallback) => {
     let zip = JSZip(arrayBuffer);
-    console.log(zip);
+    //console.log(zip);
     zip.filter(( path, file ) => {
         let manager = new THREE.LoadingManager();
         manager.setURLModifier((url) => {
             let file = zip.files[url];
             if(file) {
-                console.log('Loading', url);
+                //console.log('Loading', url);
                 var blob = new Blob([file.asArrayBuffer()], { type: 'application/octet-stream' });
                 return URL.createObjectURL(blob);
             }

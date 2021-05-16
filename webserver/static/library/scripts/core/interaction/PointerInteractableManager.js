@@ -79,31 +79,38 @@ class PointerInteractableManager {
         }
     }
 
-    _raycastInteractables(controllers) {
-        for(let option in controllers) {
-            let controller = controllers[option];
-            let raycaster = controller['raycaster'];
-            let isPressed = controller['isPressed'];
-            let closestInteractable;
-            for(let interactable of this._interactables) {
-                let threeObj = interactable.getThreeObj();
-                let intersections;
-                if(raycaster == null) {
-                    intersections = [];
-                } else {
-                    intersections = raycaster.intersectObject(threeObj, true);
+    _raycastInteractables(controller, interactables) {
+        let raycaster = controller['raycaster'];
+        for(let interactable of interactables) {
+            let threeObj = interactable.getThreeObj();
+            let intersections;
+            if(raycaster == null) {
+                intersections = [];
+            } else {
+                intersections = raycaster.intersectObject(threeObj, true);
+            }
+            if(intersections.length != 0) {
+                if(interactable.children.size != 0) {
+                    this._raycastInteractables(controller, Array.from(interactable.children));
                 }
-                if(intersections.length != 0) {
-                    let distance = intersections[0].distance;
-                    if(distance < controller['closestPointDistance']) {
-                        controller['closestPointDistance'] = distance;
-                        controller['closestPoint'] = intersections[0].point;
-                        closestInteractable = interactable;
-                    }
+                let distance = intersections[0].distance;
+                if(!interactable.isOnlyGroup() && distance < controller['closestPointDistance']) {
+                    controller['closestPointDistance'] = distance;
+                    controller['closestPoint'] = intersections[0].point;
+                    controller['closestInteractable'] = interactable;
                 }
             }
+        }
+    }
+
+    _updateInteractables(controllers) {
+        for(let option in controllers) {
+            let controller = controllers[option];
+            let isPressed = controller['isPressed'];
+            this._raycastInteractables(controller, this._interactables);
             let hoveredInteractable = this._hoveredInteractables[option];
             let selectedInteractable = this._selectedInteractables[option];
+            let closestInteractable = controller['closestInteractable'];
             if(closestInteractable) {
                 if(isPressed) {
                     if(hoveredInteractable == closestInteractable) {
@@ -151,7 +158,7 @@ class PointerInteractableManager {
             };
         }
 
-        this._raycastInteractables(controllers);
+        this._updateInteractables(controllers);
     }
 
     _updateForPointer() {
@@ -165,7 +172,7 @@ class PointerInteractableManager {
             }
         };
 
-        this._raycastInteractables(controllers);
+        this._updateInteractables(controllers);
     }
 
     _updateForMobile() {

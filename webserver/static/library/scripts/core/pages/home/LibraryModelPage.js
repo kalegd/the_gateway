@@ -68,11 +68,12 @@ class LibraryModelPage {
         this._container.position.setY(0.7);
         this._container.position.setZ(2);
 
-        let interactable = new PointerInteractable(this._container.children[0]);
+        this._containerInteractable = new PointerInteractable(
+            this._container.children[0], null, false);
         let backInteractable = new PointerInteractable(backButton, () => {
             this._controller.back();
         });
-        this._interactables.push(interactable);
+        this._interactables.push(this._containerInteractable);
         this._interactables.push(backInteractable);
         this._pivotPoint.add(this._container);
     }

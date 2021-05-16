@@ -37,8 +37,9 @@ class AccountsMenuPage {
         this._container.position.setY(0.7);
         this._container.position.setZ(2);
 
-        let interactable = new PointerInteractable(this._container.children[0]);
-        this._interactables.push(interactable);
+        this._containerInteractable = new PointerInteractable(
+            this._container.children[0], null, false);
+        this._interactables.push(this._containerInteractable);
     }
 
     _addPageContent(accounts, selectFunc, previousPageFunc, nextPageFunc) {
@@ -59,7 +60,7 @@ class AccountsMenuPage {
             });
             let interactable = new PointerInteractable(previousPage,
                                                        previousPageFunc);
-            this._interactables.push(interactable);
+            this._containerInteractable.addChild(interactable);
         } else {
             previousPage = ThreeMeshUIHelper.createTextBlock({
                 'text': ' ',
@@ -88,7 +89,7 @@ class AccountsMenuPage {
                     ? selectFunc(accounts[i])
                     : this._login(accounts[i]);
             });
-            this._interactables.push(interactable);
+            this._containerInteractable.addChild(interactable);
         }
         let nextPage;
         if(nextPageFunc) {
@@ -100,7 +101,7 @@ class AccountsMenuPage {
             });
             let interactable = new PointerInteractable(nextPage,
                                                        nextPageFunc);
-            this._interactables.push(interactable);
+            this._containerInteractable.addChild(interactable);
         } else {
             nextPage = ThreeMeshUIHelper.createTextBlock({
                 'text': ' ',

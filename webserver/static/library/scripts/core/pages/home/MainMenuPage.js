@@ -52,8 +52,9 @@ class MainMenuPage {
         this._container.position.setY(0.7);
         this._container.position.setZ(2);
 
-        let interactable = new PointerInteractable(this._container.children[0]);
-        this._interactables.push(interactable);
+        this._containerInteractable = new PointerInteractable(
+            this._container.children[0], null, false);
+        this._interactables.push(this._containerInteractable);
     }
 
     _addPageContent() {
@@ -75,7 +76,7 @@ class MainMenuPage {
             let interactable = new PointerInteractable(linkButton, () => {
                 this._controller.goToPage(links[i].pageId);
             });
-            this._interactables.push(interactable);
+            this._containerInteractable.addChild(interactable);
         }
         this._container.add(columnBlock);
     }

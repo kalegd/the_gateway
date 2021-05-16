@@ -153,10 +153,8 @@ export default class Main {
     _update() {
         this._stats.begin();
         let timeDelta = this._clock.getDelta();
-        if(global.deviceType == "XR") {
-            global.physicsScene.simulate(timeDelta, true);
-            global.physicsScene.fetchResults(true);
-        }
+        global.physicsScene.simulate(timeDelta, true);
+        global.physicsScene.fetchResults(true);
         this._userController.update(timeDelta);
         this._sceneController.update(timeDelta);
         this._renderer.render(this._scene, this._camera);

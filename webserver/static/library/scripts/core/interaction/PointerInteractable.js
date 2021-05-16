@@ -3,12 +3,19 @@ import ThreeMeshUIHelper from '/library/scripts/core/resources/ThreeMeshUIHelper
 import States from '/library/scripts/core/enums/PointerInteractableStates.js';
 
 class PointerInteractable {
-    constructor(threeObj, actionFunc) {
+    constructor(threeObj, actionFunc, canDisableOrbit, canDisplayPointer) {
         this._threeObj = threeObj;
         this._actionFunc = actionFunc;
         this._state = States.IDLE;
+        this._canDisableOrbit = global.deviceType != "XR" && canDisableOrbit != false;
+        this.canDisplayPointer = global.deviceType == "XR" && canDisplayPointer != false;
+        this.children = new Set();
         this._hoveredOwners = new Set();
         this._selectedOwners = new Set();
+    }
+
+    isOnlyGroup() {
+        return this._actionFunc != null && !this.canDisplayPointer && !this._canDisableOrbit;
     }
 
     getThreeObj() {
@@ -58,13 +65,13 @@ class PointerInteractable {
     addSelectedBy(owner) {
         this._selectedOwners.add(owner);
         this.setState(States.SELECTED);
-        global.sessionHandler.disableOrbit();
+        if(this._canDisableOrbit) global.sessionHandler.disableOrbit();
     }
 
     removeSelectedBy(owner) {
         this._selectedOwners.delete(owner);
         this._determineAndSetState();
-        global.sessionHandler.enableOrbit();
+        if(this._canDisableOrbit) global.sessionHandler.enableOrbit();
     }
 
     reset() {
@@ -75,6 +82,10 @@ class PointerInteractable {
 
     updateAction(newActionFunc) {
         this._actionFunc = newActionFunc;
+    }
+
+    addChild(interactable) {
+        this.children.add(interactable);
     }
 }
 
