@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/kalegd/the_gateway#readme",
   "devDependencies": {
-    "electron": "^9.3.1",
+    "electron": "^11.5.0",
     "express": "^4.17.1"
   },
   "dependencies": {
