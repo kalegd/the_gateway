@@ -32,7 +32,7 @@
     "file-type": "^16.1.0",
     "internal-ip": "^6.0.0",
     "jquery": "^3.5.1",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "nedb-promises": "^4.0.3",
     "node-fetch": "^2.6.1",
     "sha.js": "^2.4.11",
